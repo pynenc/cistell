@@ -1,0 +1,121 @@
+[tool.poetry]
+name = "cistell"
+version = "0.0.1"
+description = "Configuration library for pynenc and piceli projects"
+authors = ["Jose Diaz"]
+license = "MIT License"
+readme = "README.md"
+homepage = "https://cistell.pynenc.org"
+documentation = "https://docs.cistell.pynenc.org"
+repository = "https://github.com/pynenc/cistell"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+
+[tool.poetry.dependencies]
+python = ">=3.11.6"
+pyyaml = "^6.0.1"
+typing-extensions = "^4.9.0"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "23.11.0"
+pytest = ">=7.3.1,<8.0.0"
+coverage = { version = ">=7.2.6,<8.0", extras = ["toml"] }
+mypy = "1.7.0"
+types-PyYAML = "6.0.12.12"
+pre-commit = "^3.5.0"
+pytest-timeout = "^2.2.0"
+
+
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "^7.0"
+myst-parser = "^2"
+furo = "^2023"
+sphinx-copybutton = "^0.5.2"
+sphinx-design = "^0.5.0"
+sphinx-inline-tabs = "^2023.4.21"
+sphinx-autodoc2 = "^0.5.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.isort]
+profile = "black"
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+required-version = '23.11.0'
+exclude = '''
+/(
+    \.mypy_cache
+    | \.env
+    | \.venv
+)/
+'''
+
+
+[tool.ruff]
+select = [
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "F", # pyflakes
+    # "I",  # isort # using isort for now
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501", # line too long, handled by black
+    # "B008",  # do not perform function calls in argument defaults
+    # "C901",  # too complex
+    # "W191", # indentation contains tabs
+]
+
+[tool.mypy]
+files = ["cistell"]
+warn_unused_configs = true
+ignore_missing_imports = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+exclude = 'venv,env'
+show_error_codes = true
+pretty = true
+allow_redefinition = true
+no_implicit_optional = true
+strict_equality = true
+
+[tool.pytest]
+log_cli = true
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore:Running in a secondary thread. Signal handling will be skipped.:UserWarning",
+    "ignore::pytest.PytestUnhandledThreadExceptionWarning",
+]
+timeout = 5
+
+[tool.coverage.run]
+omit = [
+    "tests/*", # Exclude all files in the tests directory
+]
+relative_files = true # to combine coverage data from multiple processes
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if (typing\\.)?TYPE_CHECKING:",
+    "^\\s*\\.\\.\\.\\s*$",           # ... ellipsis
+    "if __name__ == .__main__.:",
+]
