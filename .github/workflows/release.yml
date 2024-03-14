@@ -42,6 +42,11 @@ jobs:
         run: |
           echo "::set-output name=sha::$(git rev-parse --verify --quiet HEAD^)"
 
+      - name: Print working directory and list files
+        run: |
+          pwd
+          ls -la
+
       - name: Detect and tag new version
         id: check-version
         if: steps.check-parent-commit.outputs.sha
