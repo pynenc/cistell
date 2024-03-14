@@ -15,7 +15,7 @@ class ConfigRoot(ABC):
     ENV_PREFIX: str = defaults.ENV_PREFIX
     ENV_SEP: str = defaults.ENV_SEPARATOR
     ENV_FILEPATH: str = defaults.ENV_FILEPATH
-    TOML_IGNORE_CONFIG_PATTERN: str = defaults.TOML_IGNORE_CONFIG_PATTERN
+    IGNORE_CLASS_NAME_SUBSTR: str = defaults.IGNORE_CLASS_NAME_SUBSTR
 
     def __init__(
         self,
@@ -51,7 +51,7 @@ class ConfigRoot(ABC):
         return list(set().union(*self.config_cls_to_fields.values()))
 
     def get_config_id(self, config_cls: Type["ConfigRoot"]) -> str:
-        return config_cls.__name__.replace(self.TOML_IGNORE_CONFIG_PATTERN, "").lower()
+        return config_cls.__name__.replace(self.IGNORE_CLASS_NAME_SUBSTR, "").lower()
 
     @abstractmethod
     def init_parent_values(

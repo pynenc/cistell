@@ -11,7 +11,7 @@ class LibraryConfigBase(ConfigBase):
     ENV_PREFIX = "LIBCFG"
     ENV_SEP = "<->"
     ENV_FILEPATH = "CFGFILE"
-    TOML_IGNORE_CONFIG_PATTERN = "LibraryConfig"
+    IGNORE_CLASS_NAME_SUBSTR = "LibraryConfig"
 
 
 class LibraryConfigMain(LibraryConfigBase):
