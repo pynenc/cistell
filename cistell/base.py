@@ -70,6 +70,9 @@ class ConfigBase(ConfigRoot):
                 ConfigBase,
                 ConfigRoot,
             ):
+                if not parent.config_fields() and ConfigBase in parent.__bases__:
+                    # Skip this parent as it's just for customization without fields
+                    continue
                 self.init_config_values(parent, config_values, config_filepath)
 
     def init_config_values(
