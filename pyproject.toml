@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cistell"
-version = "0.0.3"
+version = "0.0.4"
 description = "Configuration library for pynenc and piceli projects"
 authors = ["Jose Diaz"]
 license = "MIT License"
