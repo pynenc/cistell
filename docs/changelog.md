@@ -2,6 +2,10 @@
 
 For detailed information on each version, please visit the [Cistell GitHub Releases page](https://github.com/pynenc/cistell/releases).
 
+## Version 0.0.4
+
+- ConfigRoot.get_env_key is now a class method instead of instance
+
 ## Version 0.0.3
 
 - Fix issue with customization classes, should not be considered.

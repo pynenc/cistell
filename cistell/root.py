@@ -34,13 +34,14 @@ class ConfigRoot(ABC):
         self._mapped_keys: set[str] = set()
         self.init_config_values(self.__class__, config_values, config_filepath)
 
+    @classmethod
     def get_env_key(
-        self, field: str, config: Optional[Type["ConfigRoot"]] = None
+        cls, field: str, config: Optional[Type["ConfigRoot"]] = None
     ) -> str:
         """gets the key used in the environment variables"""
         if config:
-            return f"{self.ENV_PREFIX}{self.ENV_SEP}{config.__name__.upper()}{self.ENV_SEP}{field.upper()}"
-        return f"{self.ENV_PREFIX}{self.ENV_SEP}{field.upper()}"
+            return f"{cls.ENV_PREFIX}{cls.ENV_SEP}{config.__name__.upper()}{cls.ENV_SEP}{field.upper()}"
+        return f"{cls.ENV_PREFIX}{cls.ENV_SEP}{field.upper()}"
 
     @classmethod
     def config_fields(cls) -> list[str]:
