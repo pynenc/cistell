@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
   pull_request:
+    branches: [main]  # Only run on PRs targeting main
+    types: [opened, synchronize, reopened]  # Explicitly list PR events
+  workflow_dispatch:
 
 jobs:
   unit-tests:
