@@ -13,6 +13,7 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
+      - run: echo "Running Pre-commit"
       - uses: actions/checkout@v4
 
       - name: Set up Python

@@ -4,13 +4,13 @@ on:
   push:
     branches:
       - main
-      - master
 
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
     steps:
+      - run: echo "Running Release"
       - name: Check out the repository
         uses: actions/checkout@v4
         with:
