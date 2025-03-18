@@ -2,6 +2,10 @@
 
 For detailed information on each version, please visit the [Cistell GitHub Releases page](https://github.com/pynenc/cistell/releases).
 
+## Version 0.0.5
+
+- LRU cache of loaded files to avoid OsError in some environments
+
 ## Version 0.0.4
 
 - ConfigRoot.get_env_key is now a class method instead of instance
