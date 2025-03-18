@@ -9,6 +9,7 @@ jobs:
   labeler:
     runs-on: ubuntu-latest
     steps:
+      - run: echo "Running Labeler"
       - name: Checkout
         uses: actions/checkout@v4
       - name: Run Labeler

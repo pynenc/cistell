@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - run: echo "Running Tests"
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
