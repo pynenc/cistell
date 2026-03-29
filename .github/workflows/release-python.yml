@@ -66,9 +66,9 @@ jobs:
           if [[ "${{ steps.check-version.outputs.tag }}" != "" ]]; then
             echo "version=$current_version" >> "$GITHUB_OUTPUT"
           elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "version=${current_version}.dev$(date +%s)" >> "$GITHUB_OUTPUT"
+            echo "version=${current_version}-dev.$(date +%s)" >> "$GITHUB_OUTPUT"
           else
-            echo "version=${current_version}.dev$(date +%s)" >> "$GITHUB_OUTPUT"
+            echo "version=${current_version}-dev.$(date +%s)" >> "$GITHUB_OUTPUT"
           fi
 
   pr-version:
@@ -85,7 +85,7 @@ jobs:
         id: set-version
         run: |
           current_version=$(grep '^version = ' Cargo.toml | head -1 | cut -d '"' -f 2)
-          pr_version="${current_version}rc${{ github.event.pull_request.number }}.dev${{ github.run_number }}"
+          pr_version="${current_version}-rc.${{ github.event.pull_request.number }}.dev.${{ github.run_number }}"
           echo "version=$pr_version" >> "$GITHUB_OUTPUT"
 
   create-sdist:

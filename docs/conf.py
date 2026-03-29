@@ -1,16 +1,25 @@
 import datetime
 import importlib.metadata
 import os
+import re
 import sys
 from typing import Any
 
 sys.path.insert(0, os.path.abspath(".."))
 
-DISTRIBUTION_METADATA = importlib.metadata.metadata("Cistell")
+try:
+    DISTRIBUTION_METADATA = importlib.metadata.metadata("Cistell")
+    author = DISTRIBUTION_METADATA["Author"]
+    version = DISTRIBUTION_METADATA["Version"]
+except importlib.metadata.PackageNotFoundError:
+    # Package not installed (e.g. CI docs-only build). Read from Cargo.toml.
+    _cargo = os.path.join(os.path.dirname(__file__), "..", "Cargo.toml")
+    _text = open(_cargo).read()  # noqa: SIM115
+    _m = re.search(r'^version\s*=\s*"([^"]+)"', _text, re.MULTILINE)
+    version = _m.group(1) if _m else "0.0.0"
+    author = "Luis Diaz"
+
 # -- Project information -----------------------------------------------------
-author = DISTRIBUTION_METADATA["Author"]
-project = DISTRIBUTION_METADATA["Name"]
-version = DISTRIBUTION_METADATA["Version"]
 current_year = datetime.datetime.now(datetime.UTC).year
 project = "cistell"
 copyright = f"{current_year}, {author}"
