@@ -111,8 +111,12 @@ jobs:
           needs.pr-version.result == 'success'
         run: |
           VERSION="${{ needs.pr-version.outputs.version || needs.check-version.outputs.version }}"
-          echo "Patching workspace version to $VERSION"
-          sed -i "s/^version = \".*\"/version = \"$VERSION\"/" Cargo.toml
+          CURRENT=$(grep '^version = ' Cargo.toml | head -1 | cut -d '"' -f 2)
+          echo "Patching workspace version $CURRENT → $VERSION"
+          sed -i.bak "s/^version = \".*\"/version = \"$VERSION\"/" Cargo.toml
+          # Also patch workspace dependency versions so pre-release resolves
+          sed -i.bak "s/version = \"$CURRENT\", path/version = \"=$VERSION\", path/g" Cargo.toml
+          rm -f Cargo.toml.bak
 
       - name: Create source distribution
         uses: PyO3/maturin-action@db323e2cf5679b7feb8bcb561a36b27a0bc19e79 # v1
@@ -173,8 +177,12 @@ jobs:
         shell: bash
         run: |
           VERSION="${{ needs.pr-version.outputs.version || needs.check-version.outputs.version }}"
-          echo "Patching workspace version to $VERSION"
-          sed -i"" "s/^version = \".*\"/version = \"$VERSION\"/" Cargo.toml
+          CURRENT=$(grep '^version = ' Cargo.toml | head -1 | cut -d '"' -f 2)
+          echo "Patching workspace version $CURRENT → $VERSION"
+          sed -i.bak "s/^version = \".*\"/version = \"$VERSION\"/" Cargo.toml
+          # Also patch workspace dependency versions so pre-release resolves
+          sed -i.bak "s/version = \"$CURRENT\", path/version = \"=$VERSION\", path/g" Cargo.toml
+          rm -f Cargo.toml.bak
 
       - name: Build wheel
         uses: PyO3/maturin-action@db323e2cf5679b7feb8bcb561a36b27a0bc19e79 # v1

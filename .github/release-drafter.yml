@@ -1,43 +1,43 @@
-name-template: 'v$RESOLVED_VERSION'
-tag-template: 'v$RESOLVED_VERSION'
+name-template: "v$RESOLVED_VERSION"
+tag-template: "v$RESOLVED_VERSION"
 template: |
   ## What's Changed
 
   $CHANGES
 categories:
-  - title: '🚀 Features'
+  - title: "🚀 Features"
     labels:
-      - 'feature'
-      - 'enhancement'
-  - title: '🐛 Bug Fixes'
+      - "feature"
+      - "enhancement"
+  - title: "🐛 Bug Fixes"
     labels:
-      - 'fix'
-      - 'bugfix'
-      - 'bug'
-  - title: '🔒 Security'
+      - "fix"
+      - "bugfix"
+      - "bug"
+  - title: "🔒 Security"
     labels:
-      - 'security'
-  - title: '📖 Documentation'
+      - "security"
+  - title: "📖 Documentation"
     labels:
-      - 'docs'
-      - 'documentation'
-  - title: '🧰 Maintenance'
+      - "docs"
+      - "documentation"
+  - title: "🧰 Maintenance"
     labels:
-      - 'chore'
-      - 'refactor'
-      - 'dependencies'
+      - "chore"
+      - "refactor"
+      - "dependencies"
 exclude-labels:
-  - 'skip-changelog'
+  - "skip-changelog"
 version-resolver:
   major:
     labels:
-      - 'major'
+      - "major"
   minor:
     labels:
-      - 'minor'
+      - "minor"
   patch:
     labels:
-      - 'patch'
+      - "patch"
   default: patch
 sort-by: merged_at
 sort-direction: descending

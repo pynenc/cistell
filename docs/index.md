@@ -43,17 +43,21 @@ Designed to work with **rustvello** (Rust task engine) and **pynenc** (Python di
 ::::{tab-set}
 
 :::{tab-item} Python
+
 ```bash
 pip install cistell
 ```
+
 :::
 
 :::{tab-item} Rust
+
 ```toml
 [dependencies]
 cistell-core = "0.1"
 cistell-macros = "0.1"
 ```
+
 :::
 
 ::::

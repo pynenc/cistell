@@ -4,17 +4,17 @@ For existing `cistell` Python users, transitioning to version 0.1.0 is designed 
 
 ## What's Changed?
 
-| Before | After |
-|--------|-------|
-| `pip install cistell` | `pip install cistell` (unchanged) |
-| `from cistell import ConfigBase, ConfigField` | Same (unchanged) |
-| Python ≥ 3.11.6 | Python ≥ 3.12 |
-| `typing.Optional[X]` | `X | None` |
-| `typing-extensions` required | Not needed |
-| `pyyaml` required | Not needed (YAML parsing done in Rust) |
-| Poetry development | uv development |
-| `poetry install` | `uv sync` |
-| `poetry build` | `maturin build` |
+| Before                                        | After                                  |
+| --------------------------------------------- | -------------------------------------- | ----- |
+| `pip install cistell`                         | `pip install cistell` (unchanged)      |
+| `from cistell import ConfigBase, ConfigField` | Same (unchanged)                       |
+| Python ≥ 3.11.6                               | Python ≥ 3.12                          |
+| `typing.Optional[X]`                          | `X                                     | None` |
+| `typing-extensions` required                  | Not needed                             |
+| `pyyaml` required                             | Not needed (YAML parsing done in Rust) |
+| Poetry development                            | uv development                         |
+| `poetry install`                              | `uv sync`                              |
+| `poetry build`                                | `maturin build`                        |
 
 ## New Features Available
 

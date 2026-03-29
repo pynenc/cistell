@@ -53,12 +53,10 @@ def test_library_config_file() -> None:
         filepath = os.path.join(tmpdir, "lib_config.json")
         with pathlib.Path(filepath).open(mode="w") as _file:
             _file.write(
-                json.dumps(
-                    {
-                        "main": {"value": "file_main"},
-                        "secondary": {"value": 5},
-                    }
-                )
+                json.dumps({
+                    "main": {"value": "file_main"},
+                    "secondary": {"value": 5},
+                })
             )
 
         # Set up environment variable to pick config file
@@ -75,12 +73,10 @@ def test_library_config_specific_env_over_file() -> None:
         filepath = os.path.join(tmpdir, "lib_config.json")
         with pathlib.Path(filepath).open(mode="w") as _file:
             _file.write(
-                json.dumps(
-                    {
-                        "main": {"value": "file_main"},
-                        "secondary": {"value": 5},
-                    }
-                )
+                json.dumps({
+                    "main": {"value": "file_main"},
+                    "secondary": {"value": 5},
+                })
             )
 
         with patch.dict(

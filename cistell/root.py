@@ -33,14 +33,12 @@ class ConfigRoot(ABC):
 
         # on the first run, we load defaults values specified in the mapping
         # afterwards, that values will be modified by the ancestors
-        # the childs will have higher priority
+        # the children will have higher priority
         self._mapped_keys: set[str] = set()
         self.init_config_values(self.__class__, config_values, config_filepath)
 
     @classmethod
-    def get_env_key(
-        cls, field: str, config: type["ConfigRoot"] | None = None
-    ) -> str:
+    def get_env_key(cls, field: str, config: type["ConfigRoot"] | None = None) -> str:
         """Gets the key used in the environment variables"""
         if config:
             return f"{cls.ENV_PREFIX}{cls.ENV_SEP}{config.__name__.upper()}{cls.ENV_SEP}{field.upper()}"
@@ -148,7 +146,7 @@ class ConfigRoot(ABC):
                 parts.append(f"{k}=<secret>")
             else:
                 parts.append(f"{k}={v!r}")
-        return f"{self.__class__.__name__}({', '.join(parts)})"
+        return f"{self.__class__.__name__}({", ".join(parts)})"
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, ConfigRoot):

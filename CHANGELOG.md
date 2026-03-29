@@ -3,6 +3,7 @@
 ## 0.1.0 (unreleased)
 
 ### Added
+
 - Rust core library (`cistell-core`) with configuration resolution engine
 - `#[derive(Config)]` proc macro for zero-boilerplate config structs
 - Field provenance tracking — know where every config value came from
@@ -14,11 +15,13 @@
 - `ConfigBase.override()` context manager for test isolation
 
 ### Changed
+
 - Python minimum version: 3.12 (was 3.11.6)
 - Build system: maturin + uv (was Poetry)
 - YAML/JSON parsing now in Rust (no Python `pyyaml` dependency)
 
 ### Infrastructure
+
 - CI/CD: GitHub Actions aligned with rustvello/pynenc conventions
   - `main.yml`: quality, tests (matrix: ubuntu/macos × py3.12/3.13), docs, publish dry-run
   - `release-rust.yml`: publish cistell-macros and cistell-core to crates.io
@@ -35,5 +38,6 @@
 - Added PR template, issue templates (bug report, feature request, documentation)
 
 ### Removed
+
 - `typing-extensions` dependency (Python 3.12 has native equivalents)
 - `pyyaml` Python dependency (parsing in Rust)

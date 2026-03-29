@@ -29,7 +29,7 @@ def test_default() -> None:
 
 
 def test_config_values_map() -> None:
-    """Test that specifying the config by value overwrites defaul"""
+    """Test that specifying the config by value overwrites default"""
     conf = SomeConfig(config_values={"field": 1})
     assert conf.field == 1
 

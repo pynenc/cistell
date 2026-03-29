@@ -90,32 +90,25 @@ class ConfigBase(ConfigRoot):
         if config_values:
             mappings.append(("config_values", config_values))
         if pathlib.Path("pyproject.toml").is_file():
-            mappings.append(
-                (
-                    "pyproject.toml",
-                    load_config_file("pyproject.toml", self.TOML_CONFIG_ID),
-                )
-            )
+            mappings.append((
+                "pyproject.toml",
+                load_config_file("pyproject.toml", self.TOML_CONFIG_ID),
+            ))
         if config_filepath:
-            mappings.append(
-                (
-                    "config_filepath",
-                    load_config_file(config_filepath, self.TOML_CONFIG_ID),
-                )
-            )
+            mappings.append((
+                "config_filepath",
+                load_config_file(config_filepath, self.TOML_CONFIG_ID),
+            ))
         if filepath := os.environ.get(self.get_env_key(self.ENV_FILEPATH)):
-            mappings.append(
-                ("ENV_FILEPATH", load_config_file(filepath, self.TOML_CONFIG_ID))
-            )
-        if filepath := os.environ.get(
-            self.get_env_key(self.ENV_FILEPATH, config_cls)
-        ):
-            mappings.append(
-                (
-                    "ENV_CLASS_FILEPATH",
-                    load_config_file(filepath, self.TOML_CONFIG_ID),
-                )
-            )
+            mappings.append((
+                "ENV_FILEPATH",
+                load_config_file(filepath, self.TOML_CONFIG_ID),
+            ))
+        if filepath := os.environ.get(self.get_env_key(self.ENV_FILEPATH, config_cls)):
+            mappings.append((
+                "ENV_CLASS_FILEPATH",
+                load_config_file(filepath, self.TOML_CONFIG_ID),
+            ))
 
         # Resolve each field via Rust
         for field_name in self.config_cls_to_fields.get(config_cls.__name__, set()):

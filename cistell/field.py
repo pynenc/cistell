@@ -56,5 +56,5 @@ class ConfigField(Generic[T]):
             return self._default_value
         return instance._config_values.get(self, self._default_value)  # type: ignore[no-any-return]  # dict stores Any, runtime guarantees T via mapper
 
-    def __set__(self, instance: "ConfigRoot", value: Any) -> None:
+    def __set__(self, instance: ConfigRoot, value: Any) -> None:
         instance._config_values[self] = self._mapper(value, type(self._default_value))

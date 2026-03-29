@@ -7,6 +7,7 @@ human-readable provenance output.
 import json
 import os
 import tempfile
+
 from unittest.mock import patch
 
 import pytest
@@ -29,7 +30,7 @@ def test_explain_all_defaults() -> None:
     cfg = AppConfig()
     output = cfg.explain()
     for field in ("host", "port", "debug"):
-        assert f"[from: default]" in output
+        assert "[from: default]" in output
         assert f"{field} = " in output
     # secret field should be redacted but still show source
     assert "api_key = <secret> [from: default]" in output
@@ -86,9 +87,7 @@ def test_field_info_env_source() -> None:
 def test_explain_file_source() -> None:
     """Fields loaded from a config file should report the file path."""
     data = {"app": {"host": "file-host", "port": 3000}}
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".json", delete=False
-    ) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         json.dump(data, f)
         f.flush()
         tmp = f.name
@@ -131,9 +130,7 @@ def test_field_info_secret() -> None:
 def test_explain_mixed_sources() -> None:
     """Verify explain() when values come from multiple different sources."""
     data = {"app": {"port": 5555}}
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".json", delete=False
-    ) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         json.dump(data, f)
         f.flush()
         tmp = f.name
@@ -159,9 +156,7 @@ def test_explain_mixed_sources() -> None:
 def test_env_overrides_file() -> None:
     """Environment variables should take priority over file values."""
     data = {"app": {"host": "file-host"}}
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".json", delete=False
-    ) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         json.dump(data, f)
         f.flush()
         tmp = f.name
@@ -189,9 +184,7 @@ def test_print_explain_defaults(capsys: pytest.CaptureFixture[str]) -> None:
 def test_print_explain_mixed(capsys: pytest.CaptureFixture[str]) -> None:
     """Print explain() with mixed sources for visual review."""
     data = {"app": {"port": 5555, "debug": True}}
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".json", delete=False
-    ) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         json.dump(data, f)
         f.flush()
         tmp = f.name
