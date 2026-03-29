@@ -31,6 +31,7 @@ manifest-path = "crates/cistell-py/Cargo.toml"
 module-name = "cistell._internal"
 bindings = "pyo3"
 include = [
+    { path = "LICENSE", format = "sdist" },
     { path = "README.md", format = "sdist" },
     { path = "python/cistell/py.typed", format = "sdist" },
 ]
