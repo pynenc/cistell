@@ -1,0 +1,5 @@
+error: #[config(group = "...")] is required on the struct
+ --> tests/ui/missing_group.rs:4:1
+  |
+4 | #[config(prefix = "APP")]
+  | ^

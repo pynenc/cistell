@@ -1,4 +1,4 @@
-from typing import Any, Type
+from typing import Any
 
 import pytest
 
@@ -6,43 +6,43 @@ from cistell import base, field
 
 
 def test_default_mapper_str() -> None:
-    """test the default config field mapper for str"""
+    """Test the default config field mapper for str"""
     res = field.default_config_field_mapper(0, str)
     assert res == "0"
     assert isinstance(res, str)
 
 
 def test_default_mapper_int() -> None:
-    """test the default config field mapper for int"""
+    """Test the default config field mapper for int"""
     res = field.default_config_field_mapper("0", int)
     assert res == 0
     assert isinstance(res, int)
 
 
 def test_default_mapper_float() -> None:
-    """test the default config field mapper for float"""
+    """Test the default config field mapper for float"""
     res = field.default_config_field_mapper(0, float)
     assert res == 0.0
     assert isinstance(res, float)
 
 
 def test_default_mapper_set() -> None:
-    """test the default config field mapper for set"""
+    """Test the default config field mapper for set"""
     res = field.default_config_field_mapper([0, 1, 1], set)
     assert res == {0, 1}
     assert isinstance(res, set)
 
 
 def test_default_mapper_type_error() -> None:
-    """test the default config field mapper for type error"""
+    """Test the default config field mapper for type error"""
     with pytest.raises(TypeError) as exc_info:
         field.default_config_field_mapper("not_a_number", int)
     assert "Invalid type" in str(exc_info.value)
 
 
 def test_other_mapper() -> None:
-    def other_mapper(value: Any, expected_type: Type) -> Any:
-        """mapper that parse tuples to int, otherwise default"""
+    def other_mapper(value: Any, expected_type: type) -> Any:
+        """Mapper that parse tuples to int, otherwise default"""
         if isinstance(value, tuple):
             return -13
         return field.default_config_field_mapper(value, expected_type)

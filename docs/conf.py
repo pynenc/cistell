@@ -4,14 +4,14 @@ import os
 import sys
 from typing import Any
 
-sys.path.insert(0, os.path.abspath("../../cistell"))  # Adjust the path as needed
+sys.path.insert(0, os.path.abspath(".."))
 
 DISTRIBUTION_METADATA = importlib.metadata.metadata("Cistell")
 # -- Project information -----------------------------------------------------
 author = DISTRIBUTION_METADATA["Author"]
 project = DISTRIBUTION_METADATA["Name"]
 version = DISTRIBUTION_METADATA["Version"]
-current_year = datetime.datetime.now().year
+current_year = datetime.datetime.now(datetime.UTC).year
 project = "cistell"
 copyright = f"{current_year}, {author}"
 release = version
@@ -42,9 +42,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # -- Options for intersphinx -------------------------------------------------
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
-    "redis": ("https://redis-py.readthedocs.io/en/stable/", None),
 }
-# intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
 # -- Autodoc settings ---------------------------------------------------
 autodoc2_render_plugin = "myst"
@@ -114,6 +112,14 @@ language = "en"
 html_static_path = ["_static"]
 html_theme_options: dict[str, Any] = {
     "navigation_with_keys": True,
+    "light_css_variables": {
+        "color-brand-primary": "#E07A5F",
+        "color-brand-content": "#E07A5F",
+    },
+    "dark_css_variables": {
+        "color-brand-primary": "#F2CC8F",
+        "color-brand-content": "#F2CC8F",
+    },
     "footer_icons": [
         {
             "name": "GitHub",

@@ -1,20 +1,15 @@
 # Overview
 
-## Cistell: Streamlined Configuration Management for Python Projects
+## What Cistell Does
 
-Cistell is designed to simplify configuration management across various environments in Python applications, particularly emphasizing ease of integration and adaptability. This section provides a brief overview of the essential features of Cistell.
+Cistell resolves configuration values from multiple sources (defaults, environment variables, config files, programmatic overrides) and tracks where each value came from. It was originally built for the [pynenc](https://github.com/pynenc/pynenc) distributed task framework and later extracted as a standalone library.
 
-## Core Features and Design Philosophy
+## Core Concepts
 
-Cistell is developed with a focus on offering an intuitive and user-friendly interface for managing application settings, without sacrificing the flexibility needed for complex environments:
-
-- **Hierarchical Configuration**: Enables layered configuration strategies that allow local settings to seamlessly override global defaults.
-
-- **Environment Variable Integration**: Facilitates an intuitive method for overriding configuration values with environment variables, in alignment with the principles of twelve-factor applications.
-
-- **File-based Configuration Support**: Provides support for multiple file formats, including JSON, YAML, and TOML, to accommodate a range of project requirements and preferences.
-
-- **Modularity and Customization**: Built with extensibility in mind, enabling developers to implement custom field mappers and validation logic to suit their specific needs.
+- **Hierarchical configuration** — local settings override global defaults through class inheritance.
+- **Environment variable integration** — override any field via environment variables, following twelve-factor conventions.
+- **File-based configuration** — supports JSON, YAML, and TOML config files.
+- **Extensibility** — custom field mappers and validation logic can be plugged in.
 
 ## Leveraging Multi-Inheritance for Flexible Configuration
 

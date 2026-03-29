@@ -1,0 +1,42 @@
+[workspace]
+resolver = "2"
+members = ["crates/*"]
+default-members = ["crates/cistell-core", "crates/cistell-macros"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.85"
+homepage = "https://pynenc.org"
+repository = "https://github.com/pynenc/cistell"
+authors = ["Luis Diaz <code.luis.diaz@proton.me>"]
+license = "MIT"
+keywords = ["configuration", "config", "settings", "env"]
+categories = ["config"]
+
+[workspace.dependencies]
+cistell-core   = { version = "0.1.0", path = "crates/cistell-core" }
+cistell-macros = { version = "0.1.0", path = "crates/cistell-macros" }
+cistell-py     = { version = "0.1.0", path = "crates/cistell-py" }
+
+pyo3       = { version = "0.22", features = ["multiple-pymethods"] }
+serde      = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror  = "2"
+toml       = "0.7"
+tracing    = "0.1"
+trybuild   = "1"
+indexmap    = "2"
+zeroize    = "1"
+serde_yaml = "0.9"
+
+[workspace.lints.rust]
+unsafe_code = "deny"
+
+[workspace.lints.clippy]
+module_name_repetitions = "allow"
+wildcard_imports = "warn"
+clone_on_ref_ptr = "warn"
+redundant_closure_for_method_calls = "warn"
+unnecessary_wraps = "warn"
+map_unwrap_or = "warn"

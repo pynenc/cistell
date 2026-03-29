@@ -41,7 +41,7 @@ def test_avoid_parent_same_config() -> None:
 
 
 def test_avoid_multilevel() -> None:
-    """same conflict but on different level"""
+    """Same conflict but on different level"""
     with pytest.raises(ConfigMultiInheritanceError) as exc_info:
         _ = ConfigChildMulti()
     assert "common" in str(exc_info.value)

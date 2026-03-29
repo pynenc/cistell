@@ -1,0 +1,7 @@
+error: #[config(skip)] and #[config(default = ...)] are mutually exclusive
+ --> tests/ui/skip_with_default.rs:3:10
+  |
+3 | #[derive(Config)]
+  |          ^^^^^^
+  |
+  = note: this error originates in the derive macro `Config` (in Nightly builds, run with -Z macro-backtrace for more info)

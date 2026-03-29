@@ -1,4 +1,5 @@
 import os
+import pathlib
 import tempfile
 
 import pytest
@@ -26,14 +27,14 @@ def test_load_file_valid(extension: str, content: str, expected: dict) -> None:
     filepath = create_temp_file(content, extension)
     result = load_file("test", filepath)
     assert result == expected
-    os.remove(filepath)
+    pathlib.Path(filepath).unlink()
 
 
 def test_load_file_invalid_extension() -> None:
     filepath = create_temp_file("content", ".txt")
     with pytest.raises(ValueError, match="Unsupported file extension"):
         load_file("test", filepath)
-    os.remove(filepath)
+    pathlib.Path(filepath).unlink()
 
 
 def test_load_file_missing_file() -> None:
@@ -50,4 +51,4 @@ def test_load_file_invalid_format() -> None:
         filepath = create_temp_file(invalid_content, ext)
         with pytest.raises(ValueError):
             load_file("test", filepath)
-        os.remove(filepath)
+        pathlib.Path(filepath).unlink()

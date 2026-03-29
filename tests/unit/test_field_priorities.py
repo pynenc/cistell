@@ -1,6 +1,8 @@
 import json
 import os
+import pathlib
 import tempfile
+
 from unittest.mock import patch
 
 from cistell import base, field
@@ -24,7 +26,8 @@ def test_config_values_map() -> None:
 
 def test_config_specific_values_map() -> None:
     """Test that within a value map,
-    specific Config class values overwrite general ones"""
+    specific Config class values overwrite general ones
+    """
     conf = SomeConfig(config_values={"field": 1, "some": {"field": 2}})
     assert conf.field == 2
 
@@ -33,7 +36,7 @@ def test_config_file() -> None:
     """Test that filepath would overwrite previous values"""
     with tempfile.TemporaryDirectory() as tmpdir:
         filepath = os.path.join(tmpdir, "config.json")
-        with open(filepath, mode="w") as _file:
+        with pathlib.Path(filepath).open(mode="w") as _file:
             _file.write(json.dumps({"field": 3}))
         conf = SomeConfig(
             config_values={"field": 1, "some": {"field": 2}},
@@ -46,7 +49,7 @@ def test_config_file_specific_value() -> None:
     """Test that filepath would overwrite previous values"""
     with tempfile.TemporaryDirectory() as tmpdir:
         filepath = os.path.join(tmpdir, "config.json")
-        with open(filepath, mode="w") as _file:
+        with pathlib.Path(filepath).open(mode="w") as _file:
             _file.write(json.dumps({"field": 3, "some": {"field": 4}}))
         conf = SomeConfig(
             config_values={"field": 1, "some": {"field": 2}},
@@ -59,10 +62,10 @@ def test_config_filepath_environ() -> None:
     """Test filepath specified in environ will overwrite filepath by argument"""
     with tempfile.TemporaryDirectory() as tmpdir:
         filepath = os.path.join(tmpdir, "config.json")
-        with open(filepath, mode="w") as _file:
+        with pathlib.Path(filepath).open(mode="w") as _file:
             _file.write(json.dumps({"field": 3, "some": {"field": 4}}))
         env_filepath = os.path.join(tmpdir, "config_env.json")
-        with open(env_filepath, mode="w") as _file:
+        with pathlib.Path(env_filepath).open(mode="w") as _file:
             _file.write(json.dumps({"field": 5}))
         with patch.dict(os.environ, {"CONFIG__FILEPATH": env_filepath}):
             conf = SomeConfig(
@@ -74,16 +77,17 @@ def test_config_filepath_environ() -> None:
 
 def test_config_filepath_specific_environ() -> None:
     """Test filepath for specific config class
-    will overwrite general filepath specified in environ"""
+    will overwrite general filepath specified in environ
+    """
     with tempfile.TemporaryDirectory() as tmpdir:
         filepath = os.path.join(tmpdir, "config.json")
-        with open(filepath, mode="w") as _file:
+        with pathlib.Path(filepath).open(mode="w") as _file:
             _file.write(json.dumps({"field": 3, "some": {"field": 4}}))
         env_filepath = os.path.join(tmpdir, "config_env.json")
-        with open(env_filepath, mode="w") as _file:
+        with pathlib.Path(env_filepath).open(mode="w") as _file:
             _file.write(json.dumps({"field": 5}))
         specific_env_filepath = os.path.join(tmpdir, "config_specific_env.json")
-        with open(specific_env_filepath, mode="w") as _file:
+        with pathlib.Path(specific_env_filepath).open(mode="w") as _file:
             _file.write(json.dumps({"field": 6}))
         with patch.dict(
             os.environ,
@@ -103,13 +107,13 @@ def test_config_environ_variables() -> None:
     """Test environ config var will overwrite all previous"""
     with tempfile.TemporaryDirectory() as tmpdir:
         filepath = os.path.join(tmpdir, "config.json")
-        with open(filepath, mode="w") as _file:
+        with pathlib.Path(filepath).open(mode="w") as _file:
             _file.write(json.dumps({"field": 3, "some": {"field": 4}}))
         env_filepath = os.path.join(tmpdir, "config_env.json")
-        with open(env_filepath, mode="w") as _file:
+        with pathlib.Path(env_filepath).open(mode="w") as _file:
             _file.write(json.dumps({"field": 5}))
         specific_env_filepath = os.path.join(tmpdir, "config_specific_env.json")
-        with open(specific_env_filepath, mode="w") as _file:
+        with pathlib.Path(specific_env_filepath).open(mode="w") as _file:
             _file.write(json.dumps({"field": 6}))
         with patch.dict(
             os.environ,
@@ -130,13 +134,13 @@ def test_config_specific_environ_variables() -> None:
     """Test environ config var will overwrite all previous"""
     with tempfile.TemporaryDirectory() as tmpdir:
         filepath = os.path.join(tmpdir, "config.json")
-        with open(filepath, mode="w") as _file:
+        with pathlib.Path(filepath).open(mode="w") as _file:
             _file.write(json.dumps({"field": 3, "some": {"field": 4}}))
         env_filepath = os.path.join(tmpdir, "config_env.json")
-        with open(env_filepath, mode="w") as _file:
+        with pathlib.Path(env_filepath).open(mode="w") as _file:
             _file.write(json.dumps({"field": 5}))
         specific_env_filepath = os.path.join(tmpdir, "config_specific_env.json")
-        with open(specific_env_filepath, mode="w") as _file:
+        with pathlib.Path(specific_env_filepath).open(mode="w") as _file:
             _file.write(json.dumps({"field": 6}))
         with patch.dict(
             os.environ,

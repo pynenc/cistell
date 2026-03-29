@@ -1,0 +1,5 @@
+error: unknown struct config attribute; expected one of: prefix, group, sep, toml_key
+ --> tests/ui/unknown_attr.rs:4:43
+  |
+4 | #[config(prefix = "APP", group = "redis", bogus = "x")]
+  |                                           ^^^^^

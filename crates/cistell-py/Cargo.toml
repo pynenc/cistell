@@ -1,0 +1,24 @@
+[package]
+name = "cistell-py"
+description = "Configuration library with field provenance and secret support — Python bindings"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+homepage.workspace = true
+repository.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[lib]
+name = "cistell_py"
+crate-type = ["cdylib"]
+
+[dependencies]
+cistell-core = { path = "../cistell-core", features = ["serde", "toml", "yaml", "json"] }
+pyo3         = { workspace = true, features = ["extension-module"] }
+toml         = { workspace = true }
+serde_yaml   = { workspace = true }
+serde_json   = { workspace = true }
