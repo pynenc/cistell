@@ -26,6 +26,9 @@ permissions:
 
 env:
   PYTHON_VERSION: "3.12"
+  # Python versions to build wheels for (space-separated).
+  # Must stay within PyO3's supported range — currently ≤ 3.13 (pyo3 0.22).
+  WHEEL_PYTHON_VERSIONS: "3.12 3.13"
   CARGO_INCREMENTAL: 0
   CARGO_NET_RETRY: 10
   RUSTUP_MAX_RETRIES: 10
@@ -191,7 +194,7 @@ jobs:
           manylinux: ${{ matrix.manylinux }}
           args: >
             --release
-            --find-interpreter
+            --interpreter ${{ env.WHEEL_PYTHON_VERSIONS }}
             --out dist
 
       - name: Test wheel
