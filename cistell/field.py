@@ -1,3 +1,5 @@
+"""Configuration field descriptor and type mapping utilities."""
+
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -13,16 +15,15 @@ ConfigFieldMapper = Callable[[Any, type[T]], T]
 
 
 def default_config_field_mapper(value: Any, expected_type: type[T]) -> T:
-    """Generic type conversion function for a config field."""
+    """Convert a value to the expected type for a config field."""
     if isinstance(value, expected_type):
         return value
     try:
         callable_type = cast("Callable[[Any], T]", expected_type)
         return callable_type(value)  # type conversion
     except (ValueError, TypeError) as ex:
-        raise TypeError(
-            f"Invalid type. Expected {expected_type} instead {type(value)}."
-        ) from ex
+        msg = f"Invalid type. Expected {expected_type} instead {type(value)}."
+        raise TypeError(msg) from ex
 
 
 class ConfigField(Generic[T]):

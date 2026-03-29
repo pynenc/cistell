@@ -6,7 +6,7 @@ from cistell._internal import load_config_file as _rust_load
 
 
 def load_pyproject_toml(config_id: str, file_path: str) -> dict[str, Any]:
-    """Loads configuration from a TOML file.
+    """Load configuration from a TOML file.
 
     :param str file_path: The path to the TOML file.
     :return: A dictionary containing the configuration data.
@@ -15,7 +15,7 @@ def load_pyproject_toml(config_id: str, file_path: str) -> dict[str, Any]:
 
 
 def load_file(config_id: str, filepath: str) -> dict[str, Any]:
-    """Loads data from a file based on its extension (YAML, JSON, TOML).
+    """Load data from a file based on its extension (YAML, JSON, TOML).
 
     :param str filepath: The path to the file.
     :return: A dictionary containing the file's data.

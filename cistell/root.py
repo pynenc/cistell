@@ -1,3 +1,5 @@
+"""Core configuration root class and multi-inheritance conflict resolution."""
+
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from collections.abc import Iterator
@@ -39,20 +41,23 @@ class ConfigRoot(ABC):
 
     @classmethod
     def get_env_key(cls, field: str, config: type["ConfigRoot"] | None = None) -> str:
-        """Gets the key used in the environment variables"""
+        """Get the key used in the environment variables."""
         if config:
             return f"{cls.ENV_PREFIX}{cls.ENV_SEP}{config.__name__.upper()}{cls.ENV_SEP}{field.upper()}"
         return f"{cls.ENV_PREFIX}{cls.ENV_SEP}{field.upper()}"
 
     @classmethod
     def config_fields(cls) -> list[str]:
+        """Return the list of configuration field names."""
         return list(get_config_fields(cls))
 
     @property
     def all_fields(self) -> list[str]:
+        """Return all field names across all parent config classes."""
         return list(set().union(*self.config_cls_to_fields.values()))
 
     def get_config_id(self, config_cls: type["ConfigRoot"]) -> str:
+        """Return the configuration identifier for the given class."""
         return config_cls.__name__.replace(self.IGNORE_CLASS_NAME_SUBSTR, "").lower()
 
     @abstractmethod
@@ -62,6 +67,7 @@ class ConfigRoot(ABC):
         config_values: dict[str, Any] | None,
         config_filepath: str | None,
     ) -> None:
+        """Initialize values from parent configuration classes."""
         # Initialize parent classes that are subclasses of ConfigRoot
         for parent in config_cls.__bases__:
             if issubclass(parent, ConfigRoot) and parent is not ConfigRoot:
@@ -146,7 +152,7 @@ class ConfigRoot(ABC):
                 parts.append(f"{k}=<secret>")
             else:
                 parts.append(f"{k}={v!r}")
-        return f"{self.__class__.__name__}({", ".join(parts)})"
+        return f"{self.__class__.__name__}({', '.join(parts)})"
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, ConfigRoot):
@@ -179,6 +185,7 @@ class _OverrideContext:
 
 
 def get_config_fields(cls: type) -> Iterator[str]:
+    """Yield configuration field names from a class."""
     for key, value in cls.__dict__.items():
         if isinstance(value, ConfigField):
             yield key
@@ -187,7 +194,7 @@ def get_config_fields(cls: type) -> Iterator[str]:
 def avoid_multi_inheritance_field_conflict(
     config_cls: type, config_cls_to_fields: dict[str, set[str]]
 ) -> dict[str, str]:
-    """Ensures that the same configuration field is not defined in multiple parent classes of a given configuration class.
+    """Ensure that the same configuration field is not defined in multiple parent classes of a given configuration class.
 
     This function checks all parent classes of the provided configuration class that are subclasses of `ConfigRoot`.
     It ensures that each configuration field is defined only once among all parent classes. If a field is found in
@@ -220,9 +227,8 @@ def avoid_multi_inheritance_field_conflict(
             continue
         for key in get_config_fields(parent):
             if key in map_field_to_config_cls:
-                raise ConfigMultiInheritanceError(
-                    f"ConfigField {key} found in parent classes {parent.__name__} and {map_field_to_config_cls[key]}"
-                )
+                msg = f"ConfigField {key} found in parent classes {parent.__name__} and {map_field_to_config_cls[key]}"
+                raise ConfigMultiInheritanceError(msg)
             map_field_to_config_cls[key] = parent.__name__
             config_cls_to_fields[parent.__name__].add(key)
         # add current parent ancestor's fields that may not be specified in the current class

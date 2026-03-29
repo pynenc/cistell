@@ -15,7 +15,7 @@ def create_temp_file(content: str, extension: str) -> str:
 
 
 @pytest.mark.parametrize(
-    "extension, content, expected",
+    ("extension", "content", "expected"),
     [
         (".yaml", "key: value", {"key": "value"}),
         (".json", '{"key": "value"}', {"key": "value"}),
@@ -49,6 +49,6 @@ def test_load_file_invalid_format() -> None:
         (".toml", "key = 'value"),
     ]:
         filepath = create_temp_file(invalid_content, ext)
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"."):
             load_file("test", filepath)
         pathlib.Path(filepath).unlink()

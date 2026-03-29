@@ -3,7 +3,7 @@ install: ## Install dependencies, build the Python extension, and set up pre-com
 	@echo "🚀 Installing dependencies"
 	@uv sync --all-extras
 	@echo "🚀 Building and installing cistell-py in develop mode"
-	@uv run maturin develop --release -m crates/cistell-py/Cargo.toml
+	@uv run maturin develop --uv --release -m crates/cistell-py/Cargo.toml
 	@echo "🚀 Installing pre-commit hooks"
 	@uv run pre-commit install
 
@@ -25,7 +25,7 @@ build-rust: ## Build all Rust crates (excludes cistell-py cdylib)
 .PHONY: develop
 develop: ## Build and install cistell-py in develop mode
 	@echo "🚀 Building and installing package in develop mode"
-	@uv run maturin develop --release -m crates/cistell-py/Cargo.toml
+	@uv run maturin develop --uv --release -m crates/cistell-py/Cargo.toml
 
 .PHONY: test-python
 test-python: develop ## Run Python tests with pytest

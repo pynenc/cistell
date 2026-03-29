@@ -107,8 +107,17 @@ select = [
 ignore = [
     "D203",   # one-blank-line-before-class
     "D213",   # multi-line-summary-second-line
-    "ANN101", # missing type annotation for self
+    "D105",   # missing docstring in magic method
+    "D107",   # missing docstring in __init__
+    "ANN401", # dynamically typed expressions (Any) are sometimes necessary
+    "E501",   # line too long — handled by formatter
+    "UP046",  # non-pep695 generic class (deferred)
+    "UP047",  # non-pep695 generic function (deferred)
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D", "ANN", "RUF052", "RUF069", "PTH118"]
+"cistell/__init__.py" = ["D104"]
 
 [tool.ruff.lint.isort]
 lines-between-types = 1
@@ -120,6 +129,12 @@ preview = true
 fail_under = 85
 skip_covered = true
 show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if (typing\\.)?TYPE_CHECKING:",
+    "^\\s*\\.\\.\\.\\s*$",
+    "if __name__ == .__main__.:",
+]
 
 [tool.coverage.run]
 branch = true

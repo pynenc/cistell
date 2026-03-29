@@ -1,6 +1,9 @@
+"""Exception classes for cistell configuration errors."""
+
+
 class ConfigError(Exception):
-    """Base class for all the config related errors"""
+    """Base class for all the config related errors."""
 
 
 class ConfigMultiInheritanceError(ConfigError):
-    """Error related with multiinheritance of config fields"""
+    """Error related with multiinheritance of config fields."""

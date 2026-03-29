@@ -127,9 +127,10 @@ jobs:
             --out dist
 
       - name: Test sdist
+        shell: bash
         run: |
           pip install --force-reinstall --verbose dist/*.tar.gz
-          python -c 'import cistell'
+          cd "$RUNNER_TEMP" && python -c 'import cistell'
 
       - name: Upload sdist
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -199,9 +200,10 @@ jobs:
         if: >
           !(matrix.target == 'aarch64' && runner.os == 'Linux' && runner.arch != 'ARM64') &&
           !(matrix.target == 'aarch64-apple-darwin' && runner.arch != 'ARM64')
+        shell: bash
         run: |
           pip install --force-reinstall --verbose dist/*.whl
-          python -c 'import cistell'
+          cd "$RUNNER_TEMP" && python -c 'import cistell'
 
       - name: Upload wheel
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

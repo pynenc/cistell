@@ -1,3 +1,5 @@
+"""Concrete configuration base class with full source resolution."""
+
 import os
 import pathlib
 
@@ -65,6 +67,7 @@ class ConfigBase(ConfigRoot):
         config_values: dict[str, Any] | None,
         config_filepath: str | None,
     ) -> None:
+        """Initialize values from parent configuration classes."""
         # Initialize parent classes that are subclasses of ConfigBase
         for parent in config_cls.__bases__:
             if issubclass(parent, ConfigBase) and parent not in (
@@ -82,6 +85,7 @@ class ConfigBase(ConfigRoot):
         config_values: dict[str, Any] | None,
         config_filepath: str | None,
     ) -> None:
+        """Initialize configuration values for a specific class."""
         config_id = self.get_config_id(config_cls)
         self.init_parent_values(config_cls, config_values, config_filepath)
 

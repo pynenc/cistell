@@ -6,6 +6,7 @@ human-readable provenance output.
 
 import json
 import os
+import pathlib
 import tempfile
 
 from unittest.mock import patch
@@ -100,7 +101,7 @@ def test_explain_file_source() -> None:
         assert "config_filepath" in output
         assert "port = 3000" in output
     finally:
-        os.unlink(tmp)
+        pathlib.Path(tmp).unlink()
 
 
 # ── secret redaction ────────────────────────────────────────────────────────
@@ -147,7 +148,7 @@ def test_explain_mixed_sources() -> None:
         # debug stays default
         assert "debug = False [from: default]" in output
     finally:
-        os.unlink(tmp)
+        pathlib.Path(tmp).unlink()
 
 
 # ── env var priority over file ──────────────────────────────────────────────
@@ -168,7 +169,7 @@ def test_env_overrides_file() -> None:
         assert "env var" in info.source
         assert cfg.host == "env-host"
     finally:
-        os.unlink(tmp)
+        pathlib.Path(tmp).unlink()
 
 
 # ── print explain output (diagnostic, always passes) ───────────────────────
@@ -198,4 +199,4 @@ def test_print_explain_mixed(capsys: pytest.CaptureFixture[str]) -> None:
         print("\n--- explain() with mixed sources ---")
         print(cfg.explain())
     finally:
-        os.unlink(tmp)
+        pathlib.Path(tmp).unlink()

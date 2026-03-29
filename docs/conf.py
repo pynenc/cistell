@@ -1,12 +1,14 @@
+"""Sphinx configuration for cistell documentation."""
+
 import datetime
 import importlib.metadata
-import os
+import pathlib
 import re
 import sys
 
 from typing import Any
 
-sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
 try:
     DISTRIBUTION_METADATA = importlib.metadata.metadata("Cistell")
@@ -14,8 +16,8 @@ try:
     version = DISTRIBUTION_METADATA["Version"]
 except importlib.metadata.PackageNotFoundError:
     # Package not installed (e.g. CI docs-only build). Read from Cargo.toml.
-    _cargo = os.path.join(os.path.dirname(__file__), "..", "Cargo.toml")
-    _text = open(_cargo).read()  # noqa: SIM115
+    _cargo = pathlib.Path(__file__).parent.parent / "Cargo.toml"
+    _text = _cargo.read_text()
     _m = re.search(r'^version\s*=\s*"([^"]+)"', _text, re.MULTILINE)
     version = _m.group(1) if _m else "0.0.0"
     author = "Luis Diaz"
