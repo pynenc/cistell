@@ -122,9 +122,7 @@ jobs:
         uses: PyO3/maturin-action@db323e2cf5679b7feb8bcb561a36b27a0bc19e79 # v1
         with:
           command: sdist
-          args: >
-            --manifest-path crates/cistell-py/Cargo.toml
-            --out dist
+          args: --out dist
 
       - name: Test sdist
         shell: bash
@@ -193,7 +191,7 @@ jobs:
           manylinux: ${{ matrix.manylinux }}
           args: >
             --release
-            --manifest-path crates/cistell-py/Cargo.toml
+            --find-interpreter
             --out dist
 
       - name: Test wheel
@@ -202,7 +200,7 @@ jobs:
           !(matrix.target == 'aarch64-apple-darwin' && runner.arch != 'ARM64')
         shell: bash
         run: |
-          pip install --force-reinstall --verbose dist/*.whl
+          pip install cistell --no-index --find-links dist/ --force-reinstall
           cd "$RUNNER_TEMP" && python -c 'import cistell'
 
       - name: Upload wheel
