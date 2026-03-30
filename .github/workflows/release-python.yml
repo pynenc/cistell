@@ -80,6 +80,7 @@ jobs:
     if: github.event_name == 'pull_request'
     outputs:
       version: ${{ steps.set-version.outputs.version }}
+      pep440_version: ${{ steps.set-version.outputs.pep440_version }}
     steps:
       - name: Check out the repository
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -90,6 +91,9 @@ jobs:
           current_version=$(grep '^version = ' Cargo.toml | head -1 | cut -d '"' -f 2)
           pr_version="${current_version}-rc.${{ github.event.pull_request.number }}.dev.${{ github.run_number }}"
           echo "version=$pr_version" >> "$GITHUB_OUTPUT"
+          # PEP 440 version for PyPI (e.g. 0.1.0rc24.dev8)
+          pep440_version="${current_version}rc${{ github.event.pull_request.number }}.dev${{ github.run_number }}"
+          echo "pep440_version=$pep440_version" >> "$GITHUB_OUTPUT"
 
   create-sdist:
     name: Build source distribution
@@ -283,7 +287,10 @@ jobs:
   pr-comment:
     name: Comment PR
     needs: [pr-version, publish-to-testpypi]
-    if: github.event_name == 'pull_request' && needs.publish-to-testpypi.result == 'success'
+    if: >-
+      always() &&
+      github.event_name == 'pull_request' &&
+      needs.publish-to-testpypi.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -292,9 +299,18 @@ jobs:
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
+            const version = '${{ needs.pr-version.outputs.pep440_version }}';
+            const body = [
+              `📦 Published to [TestPyPI](https://test.pypi.org/project/cistell/${version}/)`,
+              '',
+              'Install with:',
+              '```bash',
+              `pip install --index-url https://test.pypi.org/simple/ cistell==${version}`,
+              '```',
+            ].join('\n');
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '📦 Published to TestPyPI\n\nInstall with:\n```bash\npip install --index-url https://test.pypi.org/simple/ cistell==${{ needs.pr-version.outputs.version }}\n```'
+              body,
             })
