@@ -19,11 +19,11 @@ cistell-core   = { version = "0.1.0", path = "crates/cistell-core" }
 cistell-macros = { version = "0.1.0", path = "crates/cistell-macros" }
 cistell-py     = { version = "0.1.0", path = "crates/cistell-py" }
 
-pyo3       = { version = "0.22", features = ["multiple-pymethods"] }
+pyo3       = { version = "0.28", features = ["multiple-pymethods"] }
 serde      = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror  = "2"
-toml       = "0.7"
+toml       = "1.1"
 tracing    = "0.1"
 trybuild   = "1"
 indexmap    = "2"
