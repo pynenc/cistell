@@ -53,14 +53,17 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Detect and tag new version
+      - name: Detect new version (tag is created by release-rust workflow)
         id: check-version
         if: github.event_name == 'push'
-        uses: salsify/action-detect-and-tag-new-version@e4e25f0bab8e458580a7bdaad885e7d6fcd697d6 # v2.0.1
-        with:
-          tag-template: "v{VERSION}"
-          version-command: |
-            grep '^version = ' Cargo.toml | head -1 | cut -d '"' -f 2
+        run: |
+          CURRENT=$(grep '^version = ' Cargo.toml | head -1 | cut -d '"' -f 2)
+          PREV=$(git show HEAD^:Cargo.toml 2>/dev/null | grep '^version = ' | head -1 | cut -d '"' -f 2 || echo "")
+          if [[ "$CURRENT" != "$PREV" ]]; then
+            echo "tag=v$CURRENT" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Compute effective version
         id: compute-version

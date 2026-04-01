@@ -1,6 +1,7 @@
 [package]
 name = "cistell-macros"
 description = "Configuration library with field provenance and secret support — derive macros"
+readme = "../../README.md"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
