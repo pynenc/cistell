@@ -1,17 +1,29 @@
+"""Sphinx configuration for cistell documentation."""
+
 import datetime
 import importlib.metadata
-import os
+import pathlib
+import re
 import sys
+
 from typing import Any
 
-sys.path.insert(0, os.path.abspath("../../cistell"))  # Adjust the path as needed
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
-DISTRIBUTION_METADATA = importlib.metadata.metadata("Cistell")
+try:
+    DISTRIBUTION_METADATA = importlib.metadata.metadata("Cistell")
+    author = DISTRIBUTION_METADATA["Author"]
+    version = DISTRIBUTION_METADATA["Version"]
+except importlib.metadata.PackageNotFoundError:
+    # Package not installed (e.g. CI docs-only build). Read from Cargo.toml.
+    _cargo = pathlib.Path(__file__).parent.parent / "Cargo.toml"
+    _text = _cargo.read_text()
+    _m = re.search(r'^version\s*=\s*"([^"]+)"', _text, re.MULTILINE)
+    version = _m.group(1) if _m else "0.0.0"
+    author = "Luis Diaz"
+
 # -- Project information -----------------------------------------------------
-author = DISTRIBUTION_METADATA["Author"]
-project = DISTRIBUTION_METADATA["Name"]
-version = DISTRIBUTION_METADATA["Version"]
-current_year = datetime.datetime.now().year
+current_year = datetime.datetime.now(datetime.UTC).year
 project = "cistell"
 copyright = f"{current_year}, {author}"
 release = version
@@ -42,9 +54,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # -- Options for intersphinx -------------------------------------------------
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
-    "redis": ("https://redis-py.readthedocs.io/en/stable/", None),
 }
-# intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
 # -- Autodoc settings ---------------------------------------------------
 autodoc2_render_plugin = "myst"
@@ -114,6 +124,14 @@ language = "en"
 html_static_path = ["_static"]
 html_theme_options: dict[str, Any] = {
     "navigation_with_keys": True,
+    "light_css_variables": {
+        "color-brand-primary": "#E07A5F",
+        "color-brand-content": "#E07A5F",
+    },
+    "dark_css_variables": {
+        "color-brand-primary": "#F2CC8F",
+        "color-brand-content": "#F2CC8F",
+    },
     "footer_icons": [
         {
             "name": "GitHub",

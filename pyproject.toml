@@ -1,121 +1,142 @@
-[tool.poetry]
+[project]
 name = "cistell"
-version = "0.0.7"
-description = "Configuration library for pynenc and piceli projects"
-authors = ["Jose Diaz"]
-license = "MIT License"
+dynamic = ["version"]
+description = "Configuration library with field provenance and secret support"
+authors = [{ name = "Luis Diaz", email = "code.luis.diaz@proton.me" }]
 readme = "README.md"
-homepage = "https://cistell.pynenc.org"
-documentation = "https://docs.cistell.pynenc.org"
-repository = "https://github.com/pynenc/cistell"
+license = { text = "MIT" }
+keywords = ["config", "configuration", "environment", "settings"]
+requires-python = ">=3.12"
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Rust",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
-
-[tool.poetry.dependencies]
-python = ">=3.11.6"
-pyyaml = "^6.0.1"
-typing-extensions = "^4.9.0"
-
-
-[tool.poetry.group.dev.dependencies]
-black = "23.11.0"
-pytest = ">=7.3.1,<8.0.0"
-coverage = { version = ">=7.2.6,<8.0", extras = ["toml"] }
-mypy = "1.7.0"
-types-PyYAML = "6.0.12.12"
-pre-commit = "^3.5.0"
-pytest-timeout = "^2.2.0"
-
-
-[tool.poetry.group.docs]
-optional = true
-
-[tool.poetry.group.docs.dependencies]
-sphinx = "^7.0"
-myst-parser = "^2"
-furo = "^2023"
-sphinx-copybutton = "^0.5.2"
-sphinx-design = "^0.5.0"
-sphinx-inline-tabs = "^2023.4.21"
-sphinx-autodoc2 = "^0.5.0"
+[project.urls]
+Homepage = "https://cistell.pynenc.org"
+Repository = "https://github.com/pynenc/cistell"
+Documentation = "https://docs.cistell.pynenc.org"
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+build-backend = "maturin"
+requires = ["maturin>=1.7.4"]
 
-
-[tool.isort]
-profile = "black"
-
-[tool.black]
-line-length = 88
-target-version = ['py311']
-required-version = '23.11.0'
-exclude = '''
-/(
-    \.mypy_cache
-    | \.env
-    | \.venv
-)/
-'''
-
-
-[tool.ruff]
-select = [
-    "E", # pycodestyle errors
-    "W", # pycodestyle warnings
-    "F", # pyflakes
-    # "I",  # isort # using isort for now
-    "C",  # flake8-comprehensions
-    "B",  # flake8-bugbear
-    "UP", # pyupgrade
+[tool.maturin]
+manifest-path = "crates/cistell-py/Cargo.toml"
+module-name = "cistell._internal"
+bindings = "pyo3"
+include = [
+    { path = "LICENSE", format = "sdist" },
+    { path = "README.md", format = "sdist" },
+    { path = "python/cistell/py.typed", format = "sdist" },
 ]
-ignore = [
-    "E501", # line too long, handled by black
-    # "B008",  # do not perform function calls in argument defaults
-    # "C901",  # too complex
-    # "W191", # indentation contains tabs
+features = ["pyo3/extension-module"]
+
+[tool.uv]
+managed = true
+package = false
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.6.9",
+    "maturin>=1.7.4",
+    "mypy>=1.13.0",
+    "pyyaml>=6.0.3",
+    "pre-commit>=3.0",
+]
+docs = [
+    "sphinx>=7.0",
+    "sphinx-copybutton>=0.5.2",
+    "sphinx-design>=0.5.0",
+    "sphinx-inline-tabs>=2023.4.21",
+    "sphinxcontrib-mermaid>=0.9",
+    "myst-parser>=2",
+    "furo>=2023",
+    "sphinx-autodoc2>=0.5",
 ]
 
 [tool.mypy]
 files = ["cistell"]
-warn_unused_configs = true
-ignore_missing_imports = true
+strict = true
+python_version = "3.12"
+enable_error_code = [
+  "redundant-expr",
+  "truthy-bool",
+  "ignore-without-code",
+]
+follow_imports = "silent"
 disallow_untyped_defs = true
-disallow_incomplete_defs = true
-exclude = 'venv,env'
-show_error_codes = true
+ignore_missing_imports = true
 pretty = true
-allow_redefinition = true
-no_implicit_optional = true
-strict_equality = true
-
-[tool.pytest]
-log_cli = true
 
 [tool.pytest.ini_options]
-filterwarnings = [
-    "ignore:Running in a secondary thread. Signal handling will be skipped.:UserWarning",
-    "ignore::pytest.PytestUnhandledThreadExceptionWarning",
-]
-timeout = 5
+testpaths = ["tests"]
 
-[tool.coverage.run]
-omit = [
-    "tests/*", # Exclude all files in the tests directory
+[tool.ruff]
+line-length = 88
+preview = true
+fix = true
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+  "ANN",  # flake8-annotations
+  "B",    # flake8-bugbear
+  "C4",   # flake8-comprehensions
+  "D",    # flake8-docstrings
+  "E",    # pycodestyle
+  "EM",   # flake8-errmsg
+  "F",    # pyflakes
+  "FA",   # flake8-future-annotations
+  "I",    # isort
+  "PERF", # perflint
+  "PT",   # flake8-pytest-style
+  "PTH",  # flake8-use-pathlib
+  "RUF",  # ruff-specific rules
+  "SIM",  # flake8-simplify
+  "TCH",  # flake8-type-checking
+  "UP",   # pyupgrade
+  "W",    # pycodestyle
 ]
-relative_files = true # to combine coverage data from multiple processes
+ignore = [
+    "D203",   # one-blank-line-before-class
+    "D213",   # multi-line-summary-second-line
+    "D105",   # missing docstring in magic method
+    "D107",   # missing docstring in __init__
+    "ANN401", # dynamically typed expressions (Any) are sometimes necessary
+    "E501",   # line too long — handled by formatter
+    "UP046",  # non-pep695 generic class (deferred)
+    "UP047",  # non-pep695 generic function (deferred)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D", "ANN", "RUF052", "RUF069", "PTH118"]
+"cistell/__init__.py" = ["D104"]
+
+[tool.ruff.lint.isort]
+lines-between-types = 1
+
+[tool.ruff.format]
+preview = true
 
 [tool.coverage.report]
+fail_under = 85
+skip_covered = true
+show_missing = true
 exclude_lines = [
     "pragma: no cover",
     "if (typing\\.)?TYPE_CHECKING:",
-    "^\\s*\\.\\.\\.\\s*$",           # ... ellipsis
+    "^\\s*\\.\\.\\.\\s*$",
     "if __name__ == .__main__.:",
 ]
+
+[tool.coverage.run]
+branch = true
+source = ["cistell"]

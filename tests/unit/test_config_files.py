@@ -1,6 +1,8 @@
 import json
 import os
+import pathlib
 import tempfile
+
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -71,7 +73,7 @@ def check_temp_file_content(
     filepath = create_temp_file_with_content(file_content, file_extension)
     config = ConfigChild(config_filepath=filepath)
     assert config.test_field == expected_value
-    os.remove(filepath)
+    pathlib.Path(filepath).unlink()
 
 
 def test_yaml(test_case: ConfigFileParserCheck) -> None:

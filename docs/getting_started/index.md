@@ -1,16 +1,10 @@
-# Getting Started with Cistell
-
-Welcome to Cistell, a comprehensive configuration management library for Python applications. This guide aims to help you swiftly install Cistell and set up a foundational configuration for your projects.
+# Getting Started
 
 ## Installation
-
-You can install Cistell using pip by executing the following command:
 
 ```bash
 pip install cistell
 ```
-
-Once installed, Cistell is ready to be integrated into your Python projects.
 
 ## Quick Configuration Setup
 
@@ -50,8 +44,8 @@ Cistell allows configuration values to be overridden using environment variables
   feature_flag = true
   ```
 
-Refer to the {doc}`../usage_guide/index` for detailed instructions on utilizing environment variables and configuration files with Cistell.
+Refer to the {doc}`../usage_guide/index` for details on environment variables and configuration files.
 
-## Summary
+## Next Steps
 
-After installing Cistell and setting up a basic configuration, explore further by integrating environment variables and configuration files to manage different environments effectively. Dive into advanced configurations, best practices, and various application scenarios in the {doc}`../usage_guide/index`. Understanding and implementing these practices will significantly enhance your application's flexibility and maintainability.
+See the {doc}`../usage_guide/index` for advanced configuration patterns including multi-inheritance, custom mappers, and provenance tracking.

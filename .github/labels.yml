@@ -1,76 +1,49 @@
----
-# https://github.com/cjolowicz/cookiecutter-hypermodern-python/blob/main/.github/labels.yml
-# Labels names are important as they are used by Release Drafter to decide
-# regarding where to record them in changelog or if to skip them.
-#
-# The repository labels will be automatically configured using this file and
-# the GitHub Action https://github.com/marketplace/actions/github-labeler.
-- name: breaking
-  description: Breaking Changes
-  color: 7c3ea5
-- name: bug
-  description: Something isn't working
-  color: d73a4a
-- name: build
-  description: Changes that affect the build system or external dependencies
-  color: fc964e
-- name: ci
-  description: Changes to CI configuration files and scripts
-  color: 00485e
-- name: cookiecutter
-  description: Changes outside of the template directory
-  color: f9ffb2
+# --- SemVer -----------------------------------------------------------
+- name: major
+  color: "D73A4A"
+  description: "Major version bump"
+- name: minor
+  color: "0075CA"
+  description: "Minor version bump"
+- name: patch
+  color: "CFD3D7"
+  description: "Patch version bump"
+
+# --- Conventional Commit Types ----------------------------------------
+- name: feature
+  color: "0E8A16"
+  description: "New feature"
+- name: fix
+  color: "D73A4A"
+  description: "Bug fix"
+- name: docs
+  color: "0075CA"
+  description: "Documentation improvement"
+- name: chore
+  color: "FEF2C0"
+  description: "Maintenance / tooling"
+- name: refactor
+  color: "FBCA04"
+  description: "Code refactoring"
+- name: security
+  color: "B60205"
+  description: "Security fix"
 - name: dependencies
-  description: Dependencies
-  color: 00ce44
-- name: documentation
-  description: Improvements or additions to documentation
-  color: 0075ca
-- name: duplicate
-  description: This issue or pull request already exists
-  color: cfd3d7
-- name: enhancement
-  description: New feature or request
-  color: a2eeef
-- name: github_actions
-  description: Pull requests that update Github_actions code
-  color: "000000"
-- name: good first issue
-  description: Good for newcomers
-  color: 7057ff
-- name: help wanted
-  description: Extra attention is needed
-  color: 008672
-- name: invalid
-  description: This doesn't seem right
-  color: e4e669
-- name: performance
-  description: A code change that improves performance
-  color: f3ffb2
+  color: "0366D6"
+  description: "Dependency updates"
+- name: breaking
+  color: "B60205"
+  description: "Breaking change"
+
+# --- Release Drafter --------------------------------------------------
+- name: skip-changelog
+  color: "EEEEEE"
+  description: "Exclude PR from release notes"
+
+# --- Language ---------------------------------------------------------
+- name: rust
+  color: "DEA584"
+  description: "Rust code"
 - name: python
-  description: Pull requests that update Python code
-  color: 2b67c6
-- name: question
-  description: Further information is requested
-  color: d876e3
-- name: refactoring
-  description: A code change that neither fixes a bug nor adds a feature
-  color: d4c5f9
-- name: removal
-  description: Removals and Deprecations
-  color: f00000
-- name: style
-  description: Changes that do not affect the meaning of the code (white-space, formatting, etc)
-  color: ffc6df
-- name: task
-  description:
-  color: d88c70
-- name: testing
-  description: Adding missing tests or correcting existing tests
-  color: 79e57f
-- name: wontfix
-  description: This will not be worked on
-  color: ffffff
-- name: "skip-changelog"
-  description: Changes that should be omitted from the release notes
-  color: ededed
+  color: "3572A5"
+  description: "Python code"

@@ -1,6 +1,8 @@
 import json
 import os
+import pathlib
 import tempfile
+
 from unittest.mock import patch
 
 from cistell import ConfigBase, ConfigField
@@ -49,14 +51,12 @@ def test_library_config_file() -> None:
     """Test configuration from a file overrides previous values."""
     with tempfile.TemporaryDirectory() as tmpdir:
         filepath = os.path.join(tmpdir, "lib_config.json")
-        with open(filepath, mode="w") as _file:
+        with pathlib.Path(filepath).open(mode="w") as _file:
             _file.write(
-                json.dumps(
-                    {
-                        "main": {"value": "file_main"},
-                        "secondary": {"value": 5},
-                    }
-                )
+                json.dumps({
+                    "main": {"value": "file_main"},
+                    "secondary": {"value": 5},
+                })
             )
 
         # Set up environment variable to pick config file
@@ -71,14 +71,12 @@ def test_library_config_specific_env_over_file() -> None:
     """Test environment variables override file configuration."""
     with tempfile.TemporaryDirectory() as tmpdir:
         filepath = os.path.join(tmpdir, "lib_config.json")
-        with open(filepath, mode="w") as _file:
+        with pathlib.Path(filepath).open(mode="w") as _file:
             _file.write(
-                json.dumps(
-                    {
-                        "main": {"value": "file_main"},
-                        "secondary": {"value": 5},
-                    }
-                )
+                json.dumps({
+                    "main": {"value": "file_main"},
+                    "secondary": {"value": 5},
+                })
             )
 
         with patch.dict(

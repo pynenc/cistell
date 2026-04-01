@@ -1,0 +1,5 @@
+error: required field must have #[config(default = ...)] or be Option<T>
+ --> tests/ui/required_field_no_default.rs:6:5
+  |
+6 |     host: String,
+  |     ^^^^^^^^^^^^

@@ -1,0 +1,23 @@
+[package]
+name = "cistell-macros"
+description = "Configuration library with field provenance and secret support — derive macros"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+homepage.workspace = true
+repository.workspace = true
+authors.workspace = true
+license.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lints]
+workspace = true
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn        = { version = "2", features = ["full", "extra-traits"] }
+quote      = "1"
+proc-macro2 = "1"

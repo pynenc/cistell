@@ -1,4 +1,5 @@
 import os
+import pathlib
 import tempfile
 
 import pytest
@@ -14,7 +15,7 @@ def create_temp_file(content: str, extension: str) -> str:
 
 
 @pytest.mark.parametrize(
-    "extension, content, expected",
+    ("extension", "content", "expected"),
     [
         (".yaml", "key: value", {"key": "value"}),
         (".json", '{"key": "value"}', {"key": "value"}),
@@ -26,14 +27,14 @@ def test_load_file_valid(extension: str, content: str, expected: dict) -> None:
     filepath = create_temp_file(content, extension)
     result = load_file("test", filepath)
     assert result == expected
-    os.remove(filepath)
+    pathlib.Path(filepath).unlink()
 
 
 def test_load_file_invalid_extension() -> None:
     filepath = create_temp_file("content", ".txt")
     with pytest.raises(ValueError, match="Unsupported file extension"):
         load_file("test", filepath)
-    os.remove(filepath)
+    pathlib.Path(filepath).unlink()
 
 
 def test_load_file_missing_file() -> None:
@@ -48,6 +49,6 @@ def test_load_file_invalid_format() -> None:
         (".toml", "key = 'value"),
     ]:
         filepath = create_temp_file(invalid_content, ext)
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"."):
             load_file("test", filepath)
-        os.remove(filepath)
+        pathlib.Path(filepath).unlink()

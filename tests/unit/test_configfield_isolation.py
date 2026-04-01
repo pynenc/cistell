@@ -6,7 +6,7 @@ class ConfTest(base.ConfigBase):
 
 
 def test_isolation_both_instantiate_both_first() -> None:
-    """test that one instance do not affect the other when both are instantiated first"""
+    """Test that one instance do not affect the other when both are instantiated first"""
     conf1 = ConfTest()
     conf2 = ConfTest()
     conf1.cf = 1
@@ -15,7 +15,7 @@ def test_isolation_both_instantiate_both_first() -> None:
 
 
 def test_isolation_both_instantiate_diff() -> None:
-    """test that one instance do not affect the other when both are instantiated second"""
+    """Test that one instance do not affect the other when both are instantiated second"""
     conf1 = ConfTest()
     conf1.cf = 1
     assert conf1.cf == 1

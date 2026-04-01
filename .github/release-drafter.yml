@@ -1,6 +1,9 @@
-# https://github.com/release-drafter/release-drafter
-name-template: "v$RESOLVED_VERSION 🌈"
+name-template: "v$RESOLVED_VERSION"
 tag-template: "v$RESOLVED_VERSION"
+template: |
+  ## What's Changed
+
+  $CHANGES
 categories:
   - title: "🚀 Features"
     labels:
@@ -11,10 +14,20 @@ categories:
       - "fix"
       - "bugfix"
       - "bug"
+  - title: "🔒 Security"
+    labels:
+      - "security"
+  - title: "📖 Documentation"
+    labels:
+      - "docs"
+      - "documentation"
   - title: "🧰 Maintenance"
-    label: "chore"
-change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
-change-title-escapes: '\<*_&'
+    labels:
+      - "chore"
+      - "refactor"
+      - "dependencies"
+exclude-labels:
+  - "skip-changelog"
 version-resolver:
   major:
     labels:
@@ -26,7 +39,5 @@ version-resolver:
     labels:
       - "patch"
   default: patch
-template: |
-  ## Changes
-
-  $CHANGES
+sort-by: merged_at
+sort-direction: descending

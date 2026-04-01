@@ -1,0 +1,9 @@
+# Labels applied by bcoe/conventional-release-labels
+feat: feature
+fix: fix
+docs: docs
+chore: chore
+refactor: refactor
+security: security
+deps: dependencies
+breaking: breaking

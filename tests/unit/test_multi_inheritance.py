@@ -27,8 +27,7 @@ class ConfigChildOk(ConfigParent0, ConfigParent2):
     unique_child = ConfigField("child-ok")
 
 
-class ConfigChildMulti(ConfigChildOk, ConfigParent1):
-    ...
+class ConfigChildMulti(ConfigChildOk, ConfigParent1): ...
 
 
 def test_avoid_parent_same_config() -> None:
@@ -41,7 +40,7 @@ def test_avoid_parent_same_config() -> None:
 
 
 def test_avoid_multilevel() -> None:
-    """same conflict but on different level"""
+    """Same conflict but on different level"""
     with pytest.raises(ConfigMultiInheritanceError) as exc_info:
         _ = ConfigChildMulti()
     assert "common" in str(exc_info.value)

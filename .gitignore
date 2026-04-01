@@ -159,3 +159,11 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 .vscode/settings.json
+
+# Personal local development files (scripts, notes, experiments) — not part of the project
+.local/
+
+# Rust / Maturin build artifacts
+*.dylib
+*.dSYM/
+*.pdb

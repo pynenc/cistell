@@ -1,4 +1,5 @@
 import os
+
 from unittest.mock import patch
 
 from cistell import base, field

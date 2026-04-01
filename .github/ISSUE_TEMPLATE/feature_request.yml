@@ -1,0 +1,17 @@
+name: Feature Request
+description: Suggest a feature for cistell
+title: "[Feature]: "
+labels: ["feature"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear description of the feature you'd like
+    validations:
+      required: true
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Why would this feature be useful?

@@ -1,9 +1,13 @@
-import os
+"""Core configuration root class and multi-inheritance conflict resolution."""
+
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from typing import Any, Iterator, Optional, Type
+from collections.abc import Iterator
+from types import MappingProxyType
+from typing import Any
 
 from cistell import defaults
+from cistell._internal import FieldProvenance
 from cistell.exceptions import ConfigMultiInheritanceError
 from cistell.field import ConfigField
 
@@ -19,48 +23,51 @@ class ConfigRoot(ABC):
 
     def __init__(
         self,
-        config_values: Optional[dict[str, Any]] = None,
-        config_filepath: Optional[str] = None,
+        config_values: dict[str, Any] | None = None,
+        config_filepath: str | None = None,
     ) -> None:
         self.config_cls_to_fields: dict[str, set[str]] = defaultdict(set)
         _ = avoid_multi_inheritance_field_conflict(
             self.__class__, self.config_cls_to_fields
         )
-        self._config_values: dict[ConfigField, Any] = {}
+        self._config_values: dict[ConfigField[Any], Any] = {}
+        self._provenance: dict[str, str] = {}
 
         # on the first run, we load defaults values specified in the mapping
         # afterwards, that values will be modified by the ancestors
-        # the childs will have higher priority
+        # the children will have higher priority
         self._mapped_keys: set[str] = set()
         self.init_config_values(self.__class__, config_values, config_filepath)
 
     @classmethod
-    def get_env_key(
-        cls, field: str, config: Optional[Type["ConfigRoot"]] = None
-    ) -> str:
-        """gets the key used in the environment variables"""
+    def get_env_key(cls, field: str, config: type["ConfigRoot"] | None = None) -> str:
+        """Get the key used in the environment variables."""
         if config:
             return f"{cls.ENV_PREFIX}{cls.ENV_SEP}{config.__name__.upper()}{cls.ENV_SEP}{field.upper()}"
         return f"{cls.ENV_PREFIX}{cls.ENV_SEP}{field.upper()}"
 
     @classmethod
     def config_fields(cls) -> list[str]:
+        """Return the list of configuration field names."""
         return list(get_config_fields(cls))
 
     @property
     def all_fields(self) -> list[str]:
+        """Return all field names across all parent config classes."""
         return list(set().union(*self.config_cls_to_fields.values()))
 
-    def get_config_id(self, config_cls: Type["ConfigRoot"]) -> str:
+    def get_config_id(self, config_cls: type["ConfigRoot"]) -> str:
+        """Return the configuration identifier for the given class."""
         return config_cls.__name__.replace(self.IGNORE_CLASS_NAME_SUBSTR, "").lower()
 
     @abstractmethod
     def init_parent_values(
         self,
-        config_cls: Type["ConfigRoot"],
-        config_values: Optional[dict[str, Any]],
-        config_filepath: Optional[str],
+        config_cls: type["ConfigRoot"],
+        config_values: dict[str, Any] | None,
+        config_filepath: str | None,
     ) -> None:
+        """Initialize values from parent configuration classes."""
         # Initialize parent classes that are subclasses of ConfigRoot
         for parent in config_cls.__bases__:
             if issubclass(parent, ConfigRoot) and parent is not ConfigRoot:
@@ -69,54 +76,125 @@ class ConfigRoot(ABC):
     @abstractmethod
     def init_config_values(
         self,
-        config_cls: Type["ConfigRoot"],
-        config_values: Optional[dict[str, Any]],
-        config_filepath: Optional[str],
+        config_cls: type["ConfigRoot"],
+        config_values: dict[str, Any] | None,
+        config_filepath: str | None,
     ) -> None:
         """Initialize the configuration values."""
         del config_cls, config_values, config_filepath
 
-    def init_config_value_from_mapping(
-        self, source: str, config_id: str, mapping: dict[str, Any]
-    ) -> None:
-        conf_mapping = mapping.get(config_id, {})
-        conf_mapping = conf_mapping if isinstance(conf_mapping, dict) else {}
-        for key in self.config_cls_to_fields.get(self.__class__.__name__, []):
-            self.init_config_value_key_from_mapping(
-                source, config_id, key, mapping, conf_mapping
-            )
+    def _get_field_descriptor(self, field_name: str) -> "ConfigField[Any] | None":
+        """Walk the MRO to find the ConfigField descriptor for a field name."""
+        for cls in type(self).__mro__:
+            if field_name in cls.__dict__ and isinstance(
+                cls.__dict__[field_name], ConfigField
+            ):
+                field: ConfigField[Any] = cls.__dict__[field_name]
+                return field
+        return None
 
-    def init_config_value_key_from_mapping(
-        self, source: str, config_id: str, key: str, mapping: dict, conf_mapping: dict
-    ) -> None:
-        general_key = f"{source}##{key}"
-        class_key = f"{source}##{config_id}##{key}"
-        if general_key not in self._mapped_keys and key in mapping:
-            setattr(self, key, mapping[key])
-            self._mapped_keys.add(general_key)
-        if class_key not in self._mapped_keys and key in conf_mapping:
-            setattr(self, key, conf_mapping[key])
-            self._mapped_keys.add(class_key)
+    def field_info(self, field_name: str) -> FieldProvenance:
+        """Return provenance information for a single field."""
+        if field_name not in self.all_fields:
+            msg = f"No field named '{field_name}'"
+            raise KeyError(msg)
+        field_obj = self._get_field_descriptor(field_name)
+        is_secret = bool(field_obj and field_obj._secret)
+        if field_name in self._provenance:
+            source = self._provenance[field_name]
+            is_default = False
+        else:
+            source = "default"
+            is_default = True
+        value = getattr(self, field_name)
+        display_value = None if is_secret else str(value)
+        return FieldProvenance(
+            source=source,
+            is_default=is_default,
+            is_secret=is_secret,
+            display_value=display_value,
+        )
 
-    def init_config_value_from_env_vars(self, config_cls: Type["ConfigRoot"]) -> None:
-        for key in self.config_cls_to_fields.get(config_cls.__name__, []):
-            if self.get_env_key(key, config_cls) in os.environ:
-                setattr(self, key, os.environ[self.get_env_key(key, config_cls)])
-            elif self.get_env_key(key) in os.environ:
-                setattr(self, key, os.environ[self.get_env_key(key)])
+    def explain(self) -> str:
+        """Return a human-readable provenance report for all fields."""
+        lines = []
+        for field_name in sorted(self.all_fields):
+            info = self.field_info(field_name)
+            if info.is_secret:
+                lines.append(f"{field_name} = <secret> [from: {info.source}]")
+            else:
+                lines.append(
+                    f"{field_name} = {getattr(self, field_name)} [from: {info.source}]"
+                )
+        return "\n".join(lines)
+
+    def safe_dict(self) -> MappingProxyType[str, Any]:
+        """Return an immutable dict of field values with secrets redacted."""
+        d: dict[str, Any] = {}
+        for field_name in sorted(self.all_fields):
+            field_obj = self._get_field_descriptor(field_name)
+            if field_obj and field_obj._secret:
+                d[field_name] = "<secret>"
+            else:
+                d[field_name] = getattr(self, field_name)
+        return MappingProxyType(d)
+
+    @classmethod
+    def override(cls, **kwargs: Any) -> "_OverrideContext":
+        """Return a context manager that creates a config instance with overrides."""
+        return _OverrideContext(cls, kwargs)
+
+    def __repr__(self) -> str:
+        sd = self.safe_dict()
+        parts = []
+        for k, v in sd.items():
+            if v == "<secret>":
+                parts.append(f"{k}=<secret>")
+            else:
+                parts.append(f"{k}={v!r}")
+        return f"{self.__class__.__name__}({', '.join(parts)})"
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, ConfigRoot):
+            return NotImplemented
+        if type(self) is not type(other):
+            return False
+        for field_name in self.all_fields:
+            if getattr(self, field_name) != getattr(other, field_name):
+                return False
+        return True
+
+    def __hash__(self) -> int:
+        return id(self)
 
 
-def get_config_fields(cls: Type) -> Iterator[str]:
+class _OverrideContext:
+    """Context manager for ConfigRoot.override()."""
+
+    def __init__(self, cls: type[ConfigRoot], overrides: dict[str, Any]) -> None:
+        self._cls = cls
+        self._overrides = overrides
+        self._instance: ConfigRoot | None = None
+
+    def __enter__(self) -> ConfigRoot:
+        self._instance = self._cls(config_values=self._overrides)
+        return self._instance
+
+    def __exit__(self, *args: Any) -> None:
+        self._instance = None
+
+
+def get_config_fields(cls: type) -> Iterator[str]:
+    """Yield configuration field names from a class."""
     for key, value in cls.__dict__.items():
         if isinstance(value, ConfigField):
             yield key
 
 
 def avoid_multi_inheritance_field_conflict(
-    config_cls: Type, config_cls_to_fields: dict[str, set[str]]
+    config_cls: type, config_cls_to_fields: dict[str, set[str]]
 ) -> dict[str, str]:
-    """
-    Ensures that the same configuration field is not defined in multiple parent classes of a given configuration class.
+    """Ensure that the same configuration field is not defined in multiple parent classes of a given configuration class.
 
     This function checks all parent classes of the provided configuration class that are subclasses of `ConfigRoot`.
     It ensures that each configuration field is defined only once among all parent classes. If a field is found in
@@ -149,9 +227,8 @@ def avoid_multi_inheritance_field_conflict(
             continue
         for key in get_config_fields(parent):
             if key in map_field_to_config_cls:
-                raise ConfigMultiInheritanceError(
-                    f"ConfigField {key} found in parent classes {parent.__name__} and {map_field_to_config_cls[key]}"
-                )
+                msg = f"ConfigField {key} found in parent classes {parent.__name__} and {map_field_to_config_cls[key]}"
+                raise ConfigMultiInheritanceError(msg)
             map_field_to_config_cls[key] = parent.__name__
             config_cls_to_fields[parent.__name__].add(key)
         # add current parent ancestor's fields that may not be specified in the current class
