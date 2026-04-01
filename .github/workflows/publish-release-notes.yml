@@ -21,31 +21,40 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          fetch-depth: 0
+          fetch-depth: 2
 
-      - name: Extract version from Cargo.toml
-        id: version
+      - name: Check if version changed
+        id: check
         run: |
-          VERSION=$(grep '^version = ' Cargo.toml | head -n 1 | cut -d '"' -f 2)
-          echo "Detected version: $VERSION"
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          CURRENT=$(grep '^version = ' Cargo.toml | head -1 | cut -d '"' -f 2)
+          PREV=$(git show HEAD^:Cargo.toml 2>/dev/null | grep '^version = ' | head -1 | cut -d '"' -f 2 || echo "")
+          if [[ "$CURRENT" != "$PREV" ]]; then
+            echo "is_release=true" >> "$GITHUB_OUTPUT"
+            echo "version=$CURRENT" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_release=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping: version $CURRENT unchanged"
+          fi
 
       - name: Generate Release Notes
+        if: steps.check.outputs.is_release == 'true'
         id: release-notes
         uses: release-drafter/release-drafter@0d6b7075b8d71574def39dc7a447b46221abf038 # v5.23.0
         with:
           publish: true
-          tag: v${{ steps.version.outputs.version }}
+          tag: v${{ steps.check.outputs.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update Changelog
+        if: steps.check.outputs.is_release == 'true'
         uses: stefanzweifel/changelog-updater-action@a938690fad7edf25368f37e43a1ed1b34303eb36 # v1
         with:
-          latest-version: ${{ steps.version.outputs.version }}
+          latest-version: ${{ steps.check.outputs.version }}
           release-notes: ${{ steps.release-notes.outputs.body }}
 
       - name: Commit Updated Changelog
+        if: steps.check.outputs.is_release == 'true'
         uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9 # v7.1.0
         with:
           branch: main
