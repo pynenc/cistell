@@ -4,11 +4,29 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "ci"
   - package-ecosystem: "cargo"
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      rust-dependencies:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "deps"
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      python-dependencies:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "deps"
