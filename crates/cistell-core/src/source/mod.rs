@@ -29,3 +29,19 @@ pub use env::EnvSource;
 pub use file::FileSource;
 pub use map::MapSource;
 pub use pyproject::PyprojectTomlSource;
+
+/// Read a TOML file and parse it into a `ConfigValue::Table`.
+#[cfg(feature = "toml")]
+pub(crate) fn parse_toml_file(path: &std::path::Path) -> Result<ConfigValue, ConfigError> {
+    let content = std::fs::read_to_string(path).map_err(|e| ConfigError::FileError {
+        path: path.to_path_buf(),
+        source: Box::new(e),
+    })?;
+    let table = content
+        .parse::<toml::Table>()
+        .map_err(|e| ConfigError::FileError {
+            path: path.to_path_buf(),
+            source: Box::new(e),
+        })?;
+    Ok(ConfigValue::from(toml::Value::Table(table)))
+}

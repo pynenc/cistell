@@ -91,20 +91,10 @@ impl FileSource {
     #[cfg(feature = "toml")]
     pub fn from_toml(path: impl AsRef<std::path::Path>) -> Result<Self, ConfigError> {
         let path = path.as_ref().to_path_buf();
-        let content = std::fs::read_to_string(&path).map_err(|e| ConfigError::FileError {
-            path: path.clone(),
-            source: Box::new(e),
-        })?;
-        let table: toml::Value =
-            content
-                .parse::<toml::Value>()
-                .map_err(|e| ConfigError::FileError {
-                    path: path.clone(),
-                    source: Box::new(e),
-                })?;
+        let root = super::parse_toml_file(&path)?;
         Ok(Self {
             path,
-            root: ConfigValue::from(table),
+            root,
             rank: 40,
             group: None,
         })
@@ -240,6 +230,7 @@ mod tests {
     fn test_file_source_toml_reads_key() {
         let mut f = tempfile::Builder::new().suffix(".toml").tempfile().unwrap();
         writeln!(f, "host = \"localhost\"").unwrap();
+        f.flush().unwrap();
 
         let source = FileSource::load(f.path()).unwrap();
         let meta = test_meta("host");
@@ -258,6 +249,7 @@ host = \"127.0.0.1\"
 port = 6379"
         )
         .unwrap();
+        f.flush().unwrap();
 
         let source = FileSource::load(f.path()).unwrap();
 
@@ -284,6 +276,7 @@ port = 6379"
     fn test_file_source_toml_missing_key() {
         let mut f = tempfile::Builder::new().suffix(".toml").tempfile().unwrap();
         writeln!(f, "host = \"localhost\"").unwrap();
+        f.flush().unwrap();
 
         let source = FileSource::load(f.path()).unwrap();
         let meta = test_meta("nonexistent");
@@ -303,6 +296,7 @@ port = 6379"
     fn test_file_source_invalid_toml() {
         let mut f = tempfile::Builder::new().suffix(".toml").tempfile().unwrap();
         writeln!(f, "not valid toml [[[").unwrap();
+        f.flush().unwrap();
 
         let result = FileSource::load(f.path());
         assert!(result.is_err());
@@ -315,6 +309,7 @@ port = 6379"
     fn test_file_source_rank() {
         let mut f = tempfile::Builder::new().suffix(".toml").tempfile().unwrap();
         writeln!(f, "x = 1").unwrap();
+        f.flush().unwrap();
         let source = FileSource::load(f.path()).unwrap();
         assert_eq!(source.rank(), 40);
     }
@@ -341,6 +336,7 @@ port = 6379"
   port: 6379"
         )
         .unwrap();
+        f.flush().unwrap();
         let source = FileSource::load(f.path()).unwrap();
         let meta = test_meta("redis.host");
         let result = source.get(&meta).unwrap().unwrap();
@@ -358,6 +354,7 @@ port = 6379"
   - b"
         )
         .unwrap();
+        f.flush().unwrap();
         let source = FileSource::load(f.path()).unwrap();
         let meta = test_meta("hosts");
         let result = source.get(&meta).unwrap().unwrap();
@@ -381,6 +378,7 @@ port = 6379"
 redis: *T"
         )
         .unwrap();
+        f.flush().unwrap();
         let source = FileSource::load(f.path()).unwrap();
         let meta = test_meta("redis.host");
         let result = source.get(&meta).unwrap().unwrap();
@@ -392,6 +390,7 @@ redis: *T"
     fn test_json_file_source_reads_key() {
         let mut f = tempfile::Builder::new().suffix(".json").tempfile().unwrap();
         writeln!(f, "{{\"host\": \"localhost\"}}").unwrap();
+        f.flush().unwrap();
         let source = FileSource::load(f.path()).unwrap();
         let meta = test_meta("host");
         let result = source.get(&meta).unwrap().unwrap();
@@ -407,6 +406,7 @@ redis: *T"
             "{{\"redis\": {{\"host\": \"127.0.0.1\", \"port\": 6379}}}}"
         )
         .unwrap();
+        f.flush().unwrap();
         let source = FileSource::load(f.path()).unwrap();
         let meta = test_meta("redis.host");
         let result = source.get(&meta).unwrap().unwrap();
@@ -424,6 +424,7 @@ redis: *T"
     fn test_json_file_source_float() {
         let mut f = tempfile::Builder::new().suffix(".json").tempfile().unwrap();
         writeln!(f, "{{\"val\": 3.14}}").unwrap();
+        f.flush().unwrap();
         let source = FileSource::load(f.path()).unwrap();
         let mut meta = test_meta("val");
         meta.expected_type = "f64";
@@ -436,6 +437,7 @@ redis: *T"
     fn test_json_file_source_integer_preserved() {
         let mut f = tempfile::Builder::new().suffix(".json").tempfile().unwrap();
         writeln!(f, "{{\"count\": 42}}").unwrap();
+        f.flush().unwrap();
         let source = FileSource::load(f.path()).unwrap();
         let mut meta = test_meta("count");
         meta.expected_type = "i64";
@@ -448,6 +450,7 @@ redis: *T"
     fn test_json_file_source_array() {
         let mut f = tempfile::Builder::new().suffix(".json").tempfile().unwrap();
         writeln!(f, "{{\"hosts\": [\"a\", \"b\"]}}").unwrap();
+        f.flush().unwrap();
         let source = FileSource::load(f.path()).unwrap();
         let meta = test_meta("hosts");
         let result = source.get(&meta).unwrap().unwrap();
@@ -465,6 +468,7 @@ redis: *T"
     fn test_json_file_source_invalid() {
         let mut f = tempfile::Builder::new().suffix(".json").tempfile().unwrap();
         writeln!(f, "not valid json {{{{").unwrap();
+        f.flush().unwrap();
         let result = FileSource::load(f.path());
         assert!(result.is_err());
         assert!(matches!(result.unwrap_err(), ConfigError::FileError { .. }));
@@ -475,6 +479,7 @@ redis: *T"
     fn test_yaml_file_source_missing_key() {
         let mut f = tempfile::Builder::new().suffix(".yaml").tempfile().unwrap();
         writeln!(f, "host: localhost").unwrap();
+        f.flush().unwrap();
         let source = FileSource::load(f.path()).unwrap();
         let meta = test_meta("nonexistent");
         assert!(source.get(&meta).unwrap().is_none());
@@ -485,6 +490,7 @@ redis: *T"
     fn test_yaml_file_source_invalid() {
         let mut f = tempfile::Builder::new().suffix(".yaml").tempfile().unwrap();
         writeln!(f, "  bad:\nyaml: [[[").unwrap();
+        f.flush().unwrap();
         let result = FileSource::load(f.path());
         assert!(result.is_err());
         assert!(matches!(result.unwrap_err(), ConfigError::FileError { .. }));
@@ -495,6 +501,7 @@ redis: *T"
     fn test_auto_detect_toml() {
         let mut f = tempfile::Builder::new().suffix(".toml").tempfile().unwrap();
         writeln!(f, "host = \"localhost\"").unwrap();
+        f.flush().unwrap();
         let source = FileSource::load(f.path()).unwrap();
         let meta = test_meta("host");
         let result = source.get(&meta).unwrap().unwrap();
@@ -506,6 +513,7 @@ redis: *T"
     fn test_auto_detect_yaml() {
         let mut f = tempfile::Builder::new().suffix(".yaml").tempfile().unwrap();
         writeln!(f, "host: localhost").unwrap();
+        f.flush().unwrap();
         let source = FileSource::load(f.path()).unwrap();
         let meta = test_meta("host");
         let result = source.get(&meta).unwrap().unwrap();
@@ -517,6 +525,7 @@ redis: *T"
     fn test_auto_detect_yml() {
         let mut f = tempfile::Builder::new().suffix(".yml").tempfile().unwrap();
         writeln!(f, "host: localhost").unwrap();
+        f.flush().unwrap();
         let source = FileSource::load(f.path()).unwrap();
         let meta = test_meta("host");
         let result = source.get(&meta).unwrap().unwrap();
@@ -528,6 +537,7 @@ redis: *T"
     fn test_auto_detect_json() {
         let mut f = tempfile::Builder::new().suffix(".json").tempfile().unwrap();
         writeln!(f, "{{\"host\": \"localhost\"}}").unwrap();
+        f.flush().unwrap();
         let source = FileSource::load(f.path()).unwrap();
         let meta = test_meta("host");
         let result = source.get(&meta).unwrap().unwrap();

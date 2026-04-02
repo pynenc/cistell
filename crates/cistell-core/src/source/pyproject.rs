@@ -32,18 +32,7 @@ impl PyprojectTomlSource {
     ) -> Result<Self, ConfigError> {
         let path = path.as_ref().to_path_buf();
         let root = if path.exists() {
-            let content = std::fs::read_to_string(&path).map_err(|e| ConfigError::FileError {
-                path: path.clone(),
-                source: Box::new(e),
-            })?;
-            let table: toml::Value =
-                content
-                    .parse::<toml::Value>()
-                    .map_err(|e| ConfigError::FileError {
-                        path: path.clone(),
-                        source: Box::new(e),
-                    })?;
-            Some(ConfigValue::from(table))
+            Some(super::parse_toml_file(&path)?)
         } else {
             None
         };
@@ -114,6 +103,7 @@ mod tests {
             "[tool.rustvello.redis]\nhost = \"from-pyproject\"\nport = 6380"
         )
         .unwrap();
+        f.flush().unwrap();
 
         let source = PyprojectTomlSource::new(f.path(), "RUSTVELLO", "redis").unwrap();
         let meta = test_meta("host");
@@ -142,6 +132,7 @@ mod tests {
     fn test_pyproject_no_tool_section() {
         let mut f = tempfile::Builder::new().suffix(".toml").tempfile().unwrap();
         writeln!(f, "[some.other.section]\nhost = \"xyz\"").unwrap();
+        f.flush().unwrap();
 
         let source = PyprojectTomlSource::new(f.path(), "rustvello", "redis").unwrap();
         let meta = test_meta("host");
@@ -152,6 +143,7 @@ mod tests {
     fn test_pyproject_no_group_section() {
         let mut f = tempfile::Builder::new().suffix(".toml").tempfile().unwrap();
         writeln!(f, "[tool.rustvello]\nother = 1").unwrap();
+        f.flush().unwrap();
 
         let source = PyprojectTomlSource::new(f.path(), "rustvello", "redis").unwrap();
         let meta = test_meta("host");
@@ -169,6 +161,7 @@ mod tests {
     fn test_pyproject_malformed() {
         let mut f = tempfile::Builder::new().suffix(".toml").tempfile().unwrap();
         writeln!(f, "invalid [[[").unwrap();
+        f.flush().unwrap();
 
         let result = PyprojectTomlSource::new(f.path(), "rustvello", "redis");
         assert!(result.is_err());

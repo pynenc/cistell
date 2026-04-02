@@ -329,6 +329,7 @@ fn test_resolve_file_overrides_default() {
 
     let mut f = tempfile::Builder::new().suffix(".toml").tempfile().unwrap();
     writeln!(f, "[redis]\nhost = \"from-file\"\npassword = \"file-pass\"").unwrap();
+    f.flush().unwrap();
 
     let file_source = FileSource::from_toml(f.path()).unwrap();
     let resolver = Resolver::builder()
@@ -358,6 +359,7 @@ fn test_resolve_full_priority_chain() {
         "[redis]\nhost = \"from-file\"\nport = 1111\npassword = \"file-pass\""
     )
     .unwrap();
+    f.flush().unwrap();
     let file_source = FileSource::from_toml(f.path()).unwrap();
 
     let mut map = MapSource::new("overrides");
@@ -661,6 +663,7 @@ timeout = 60
 "#
     )
     .unwrap();
+    f.flush().unwrap();
     let file_source = FileSource::from_toml(f.path()).unwrap();
 
     // Map overrides host
