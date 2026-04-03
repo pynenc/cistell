@@ -338,6 +338,7 @@ fn test_derive_and_resolve_with_file() {
         "[redis]\nhost = \"from-file\"\nport = 7000\npassword = \"file-pass\""
     )
     .unwrap();
+    file.flush().unwrap();
 
     let resolver = Resolver::builder().file(file.path()).unwrap().build();
     let resolved = resolver.resolve::<BasicRedisConfig>().unwrap();
@@ -361,6 +362,7 @@ fn test_derive_and_resolve_mixed_sources() {
         "[redis]\nhost = \"from-file\"\nport = 7000\npassword = \"file-pass\"\nallowed_hosts = [\"f1\", \"f2\"]"
     )
     .unwrap();
+    file.flush().unwrap();
 
     let mut map = MapSource::new("test-overrides");
     map.insert("host", ConfigValue::String("from-map".into()));

@@ -6,10 +6,8 @@ use pyo3::types::{PyDict, PyList, PySet, PyTuple};
 
 use cistell_core::value::ConfigValue;
 
-use pyo3::ToPyObject;
-
 /// Tracks the source and metadata of a resolved configuration field value.
-#[pyclass(frozen)]
+#[pyclass(frozen, from_py_object)]
 #[derive(Clone, Debug)]
 pub struct FieldProvenance {
     #[pyo3(get)]
@@ -54,21 +52,21 @@ impl FieldProvenance {
 // ---------------------------------------------------------------------------
 
 /// Convert a [`ConfigValue`] to a Python object recursively.
-fn config_value_to_py(py: Python<'_>, val: &ConfigValue) -> PyResult<PyObject> {
+fn config_value_to_py(py: Python<'_>, val: &ConfigValue) -> PyResult<Py<PyAny>> {
     Ok(match val {
-        ConfigValue::String(s) => s.to_object(py),
-        ConfigValue::Integer(i) => i.to_object(py),
-        ConfigValue::Float(f) => f.to_object(py),
-        ConfigValue::Bool(b) => b.to_object(py),
+        ConfigValue::String(s) => s.into_pyobject(py)?.into_any().unbind(),
+        ConfigValue::Integer(i) => i.into_pyobject(py)?.into_any().unbind(),
+        ConfigValue::Float(f) => f.into_pyobject(py)?.into_any().unbind(),
+        ConfigValue::Bool(b) => b.into_pyobject(py)?.to_owned().into_any().unbind(),
         ConfigValue::Array(arr) => {
-            let items: Vec<PyObject> = arr
+            let items: Vec<Py<PyAny>> = arr
                 .iter()
                 .map(|item| config_value_to_py(py, item))
                 .collect::<PyResult<_>>()?;
-            PyList::new_bound(py, items).into_any().unbind()
+            PyList::new(py, items)?.into_any().unbind()
         }
         ConfigValue::Table(map) => {
-            let dict = PyDict::new_bound(py);
+            let dict = PyDict::new(py);
             for (k, v) in map.iter() {
                 dict.set_item(k, config_value_to_py(py, v)?)?;
             }
@@ -88,7 +86,7 @@ fn config_value_to_py(py: Python<'_>, val: &ConfigValue) -> PyResult<PyObject> {
 /// the `[tool.{config_id}]` section is extracted.
 #[pyfunction]
 #[pyo3(signature = (path, config_id=None))]
-fn load_config_file(py: Python<'_>, path: &str, config_id: Option<&str>) -> PyResult<PyObject> {
+fn load_config_file(py: Python<'_>, path: &str, config_id: Option<&str>) -> PyResult<Py<PyAny>> {
     let p = std::path::Path::new(path);
     let content = std::fs::read_to_string(p).map_err(|e| {
         if e.kind() == std::io::ErrorKind::NotFound {
@@ -108,10 +106,10 @@ fn load_config_file(py: Python<'_>, path: &str, config_id: Option<&str>) -> PyRe
 
     let root = match extension.as_str() {
         "toml" => {
-            let val: toml::Value = content.parse().map_err(|e: toml::de::Error| {
+            let table: toml::Table = content.parse().map_err(|e: toml::de::Error| {
                 pyo3::exceptions::PyValueError::new_err(format!("Invalid TOML file {path}: {e}"))
             })?;
-            ConfigValue::from(val)
+            ConfigValue::from(toml::Value::Table(table))
         }
         "yaml" | "yml" => {
             let val: serde_yaml::Value = serde_yaml::from_str(&content).map_err(|e| {
@@ -134,7 +132,7 @@ fn load_config_file(py: Python<'_>, path: &str, config_id: Option<&str>) -> PyRe
 
     // Non-table root → empty dict (matches Python pyyaml / json behaviour).
     if !matches!(&root, ConfigValue::Table(_)) {
-        return Ok(PyDict::new_bound(py).into_any().unbind());
+        return Ok(PyDict::new(py).into_any().unbind());
     }
 
     // For pyproject.toml, extract [tool.{config_id}].
@@ -149,7 +147,7 @@ fn load_config_file(py: Python<'_>, path: &str, config_id: Option<&str>) -> PyRe
                 }
             }
             // Section not found → empty dict.
-            return Ok(PyDict::new_bound(py).into_any().unbind());
+            return Ok(PyDict::new(py).into_any().unbind());
         }
     }
 
@@ -195,17 +193,17 @@ fn resolve_field<'py>(
     secret: bool,
     mappings: Option<&Bound<'py, PyList>>,
     mapped_keys: Option<&Bound<'py, PySet>>,
-) -> PyResult<Option<(PyObject, FieldProvenance)>> {
-    let mut current_value: Option<PyObject> = None;
+) -> PyResult<Option<(Py<PyAny>, FieldProvenance)>> {
+    let mut current_value: Option<Py<PyAny>> = None;
     let mut current_source = String::new();
 
     // 1. Mapping sources (lowest → highest priority).
     if let Some(mappings) = mappings {
         for item in mappings.iter() {
-            let py_tuple = item.downcast::<PyTuple>()?;
+            let py_tuple = item.cast::<PyTuple>()?;
             let source_name: String = py_tuple.get_item(0)?.extract()?;
             let mapping_any = py_tuple.get_item(1)?;
-            let mapping = mapping_any.downcast::<PyDict>()?;
+            let mapping = mapping_any.cast::<PyDict>()?;
 
             // --- generic: mapping[field_name] ---
             let general_key = format!("{source_name}##{field_name}");
@@ -231,7 +229,7 @@ fn resolve_field<'py>(
             };
             if check_class {
                 if let Some(conf_obj) = mapping.get_item(config_id)? {
-                    if let Ok(conf_dict) = conf_obj.downcast::<PyDict>() {
+                    if let Ok(conf_dict) = conf_obj.cast::<PyDict>() {
                         if let Some(val) = conf_dict.get_item(field_name)? {
                             current_value = Some(val.unbind());
                             current_source.clone_from(&source_name);
@@ -248,7 +246,7 @@ fn resolve_field<'py>(
     // 2. Env vars (highest priority, always override).
     if let Ok(val) = std::env::var(class_env_key) {
         return Ok(Some((
-            val.to_object(py),
+            val.into_pyobject(py)?.into_any().unbind(),
             FieldProvenance {
                 source: format!("env var '{class_env_key}'"),
                 is_default: false,
@@ -259,7 +257,7 @@ fn resolve_field<'py>(
     }
     if let Ok(val) = std::env::var(generic_env_key) {
         return Ok(Some((
-            val.to_object(py),
+            val.into_pyobject(py)?.into_any().unbind(),
             FieldProvenance {
                 source: format!("env var '{generic_env_key}'"),
                 is_default: false,

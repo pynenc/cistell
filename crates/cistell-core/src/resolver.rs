@@ -364,6 +364,7 @@ mod tests {
 
         let mut f = NamedTempFile::new().unwrap();
         writeln!(f, "[redis]\nhost = \"from-file\"").unwrap();
+        f.flush().unwrap();
 
         let file_source = FileSource::from_toml(f.path()).unwrap();
         let mut defaults = DefaultSource::new();

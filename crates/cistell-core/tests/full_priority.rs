@@ -21,6 +21,7 @@ fn test_env_file_class_level() {
 
     let mut f = tempfile::Builder::new().suffix(".toml").tempfile().unwrap();
     writeln!(f, "host = \"class-level-file\"").unwrap();
+    f.flush().unwrap();
 
     temp_env::with_var("RUSTVELLO__REDIS__FILEPATH", Some(f.path()), || {
         let resolver = Resolver::builder()
@@ -71,6 +72,7 @@ fn test_env_file_global() {
 
     let mut f = tempfile::Builder::new().suffix(".toml").tempfile().unwrap();
     writeln!(f, "[redis]\nhost = \"global-file\"").unwrap();
+    f.flush().unwrap();
 
     temp_env::with_var("RUSTVELLO__FILEPATH", Some(f.path()), || {
         let resolver = Resolver::builder()
@@ -89,9 +91,11 @@ fn test_env_file_global_rank() {
 
     let mut class_f = tempfile::Builder::new().suffix(".toml").tempfile().unwrap();
     writeln!(class_f, "host = \"class-file\"").unwrap();
+    class_f.flush().unwrap();
 
     let mut global_f = tempfile::Builder::new().suffix(".toml").tempfile().unwrap();
     writeln!(global_f, "[redis]\nhost = \"global-file\"").unwrap();
+    global_f.flush().unwrap();
 
     temp_env::with_vars(
         [
@@ -208,9 +212,11 @@ fn test_mixed_sources_per_field() {
 
     let mut yaml_f = tempfile::Builder::new().suffix(".yaml").tempfile().unwrap();
     writeln!(yaml_f, "redis:\n  host: yaml-host\n  port: 2222").unwrap();
+    yaml_f.flush().unwrap();
 
     let mut toml_f = tempfile::Builder::new().suffix(".toml").tempfile().unwrap();
     writeln!(toml_f, "[redis]\ndb = 42\nhost = \"toml-host\"").unwrap();
+    toml_f.flush().unwrap();
 
     let resolver = Resolver::builder()
         .add_source(
@@ -337,6 +343,7 @@ fn test_file_flat_key_fallback() {
     // File with flat key only (no group section)
     let mut f = tempfile::Builder::new().suffix(".json").tempfile().unwrap();
     writeln!(f, r#"{{"field": 42}}"#).unwrap();
+    f.flush().unwrap();
 
     let source = cistell_core::source::FileSource::load(f.path()).unwrap();
     let resolver = Resolver::builder().add_source(source).build();
@@ -359,6 +366,7 @@ fn test_file_class_specific_overrides_flat() {
     // File with both flat and group-specific keys
     let mut f = tempfile::Builder::new().suffix(".json").tempfile().unwrap();
     writeln!(f, r#"{{"field": 1, "some": {{"field": 2}}}}"#).unwrap();
+    f.flush().unwrap();
 
     let source = cistell_core::source::FileSource::load(f.path()).unwrap();
     let resolver = Resolver::builder().add_source(source).build();
@@ -381,6 +389,7 @@ fn test_env_file_class_uses_double_underscore_separator() {
 
     let mut f = tempfile::Builder::new().suffix(".json").tempfile().unwrap();
     writeln!(f, r#"{{"field": 99}}"#).unwrap();
+    f.flush().unwrap();
 
     // The env var should be PREFIX__GROUP__FILEPATH (double underscore)
     temp_env::with_var("PYCOMPAT__SOME__FILEPATH", Some(f.path()), || {
@@ -416,6 +425,7 @@ fn test_custom_separator_env_file() {
 
     let mut f = tempfile::Builder::new().suffix(".json").tempfile().unwrap();
     writeln!(f, r#"{{"name": "from_file"}}"#).unwrap();
+    f.flush().unwrap();
 
     // Custom sep: LIBCFG<->MAIN<->FILEPATH
     temp_env::with_var("LIBCFG<->MAIN<->FILEPATH", Some(f.path()), || {
@@ -475,6 +485,7 @@ fn test_python_compat_full_priority() {
     // Generic env should win (higher priority than files)
     let mut class_f = tempfile::Builder::new().suffix(".toml").tempfile().unwrap();
     writeln!(class_f, "field = 99").unwrap();
+    class_f.flush().unwrap();
 
     temp_env::with_vars(
         [
