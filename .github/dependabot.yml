@@ -8,6 +8,8 @@ updates:
       github-actions:
         patterns:
           - "*"
+    labels:
+      - "dependencies"
     commit-message:
       prefix: "ci"
   - package-ecosystem: "cargo"
@@ -18,6 +20,8 @@ updates:
       rust-dependencies:
         patterns:
           - "*"
+    labels:
+      - "dependencies"
     commit-message:
       prefix: "chore"
   - package-ecosystem: "pip"
@@ -28,5 +32,7 @@ updates:
       python-dependencies:
         patterns:
           - "*"
+    labels:
+      - "dependencies"
     commit-message:
       prefix: "chore"

@@ -43,3 +43,8 @@ tempfile   = "3"
 trybuild   = { workspace = true }
 serde      = { workspace = true }
 serde_json = { workspace = true }
+criterion = { version = "4.4.1", package = "codspeed-criterion-compat" }
+
+[[bench]]
+name = "resolver"
+harness = false

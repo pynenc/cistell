@@ -224,7 +224,10 @@ jobs:
     name: Publish to PyPI
     needs: [check-version, create-sdist, build-wheels]
     if: >-
+      always() &&
       needs.check-version.result == 'success' &&
+      needs.create-sdist.result == 'success' &&
+      needs.build-wheels.result == 'success' &&
       (
         needs.check-version.outputs.is_release == 'true' ||
         (github.event_name == 'workflow_dispatch' && inputs.target == 'pypi')
