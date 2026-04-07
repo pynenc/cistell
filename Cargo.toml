@@ -4,7 +4,7 @@ members = ["crates/*"]
 default-members = ["crates/cistell-core", "crates/cistell-macros"]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 rust-version = "1.85"
 homepage = "https://pynenc.org"
@@ -15,9 +15,9 @@ keywords = ["configuration", "config", "settings", "env"]
 categories = ["config"]
 
 [workspace.dependencies]
-cistell-core   = { version = "0.1.0", path = "crates/cistell-core" }
-cistell-macros = { version = "0.1.0", path = "crates/cistell-macros" }
-cistell-py     = { version = "0.1.0", path = "crates/cistell-py" }
+cistell-core   = { version = "0.1.1", path = "crates/cistell-core" }
+cistell-macros = { version = "0.1.1", path = "crates/cistell-macros" }
+cistell-py     = { version = "0.1.1", path = "crates/cistell-py" }
 
 pyo3       = { version = "0.28", features = ["multiple-pymethods"] }
 serde      = { version = "1", features = ["derive"] }
