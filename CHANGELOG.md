@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.2 (2026-04-08)
+
+### Added
+
+- `resolve_field()` now accepts optional `extra_qualifiers` and `extra_env_keys`
+  keyword arguments, allowing subclasses to inject higher-priority mapping
+  subsections and environment variable keys without reimplementing the
+  resolution loop.
+- `ConfigBase.get_extra_qualifiers()` hook — override to add qualifier
+  subsection keys (e.g., task-specific config sections).
+- `ConfigBase.get_extra_env_keys()` hook — override to add extra env-var
+  keys per field (e.g., task-specific env vars).
+
 ## 0.1.1 - 2026-04-07
 
 ### What's Changed

@@ -35,4 +35,6 @@ def resolve_field(
     secret: bool = False,
     mappings: list[tuple[str, dict[str, Any]]] | None = None,
     mapped_keys: set[str] | None = None,
+    extra_qualifiers: list[str] | None = None,
+    extra_env_keys: list[str] | None = None,
 ) -> tuple[Any, FieldProvenance] | None: ...
