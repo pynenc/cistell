@@ -61,6 +61,35 @@ class ConfigBase(ConfigRoot):
     and `ConfigRedis`.
     """
 
+    def get_extra_qualifiers(
+        self,
+        config_cls: type["ConfigRoot"],
+    ) -> list[str] | None:
+        """Return extra qualifier subsection keys for mapping lookups.
+
+        Override this in subclasses to add higher-priority subsections.
+        For example, returning ``["module_name.task_name"]`` causes
+        ``mapping[config_id]["module_name.task_name"][field_name]`` to be
+        checked after the class-specific ``mapping[config_id][field_name]``.
+        """
+        del config_cls
+        return None
+
+    def get_extra_env_keys(
+        self,
+        field_name: str,
+        config_cls: type["ConfigRoot"],
+    ) -> list[str] | None:
+        """Return extra env-var keys to check for *field_name*.
+
+        Override this in subclasses to add higher-priority env vars.
+        For example, returning ``["MODULE#FUNC__MAX_RETRIES"]`` causes
+        that env var to be checked after the standard class and generic
+        env vars.
+        """
+        del field_name, config_cls
+        return None
+
     def init_parent_values(
         self,
         config_cls: type["ConfigRoot"],
@@ -115,6 +144,7 @@ class ConfigBase(ConfigRoot):
             ))
 
         # Resolve each field via Rust
+        extra_qualifiers = self.get_extra_qualifiers(config_cls)
         for field_name in self.config_cls_to_fields.get(config_cls.__name__, set()):
             field = self._get_field_descriptor(field_name)
             if field is None:
@@ -127,6 +157,8 @@ class ConfigBase(ConfigRoot):
                 secret=field._secret,
                 mappings=mappings,
                 mapped_keys=self._mapped_keys,
+                extra_qualifiers=extra_qualifiers,
+                extra_env_keys=self.get_extra_env_keys(field_name, config_cls),
             )
             if result is not None:
                 value, prov = result

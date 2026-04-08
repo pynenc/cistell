@@ -1,4 +1,6 @@
 # Relax rules for project documentation style
 MD013: false # Line length — handled by prettier
+MD024:
+  siblings_only: true # Allow repeated headings across changelog versions
 MD033: false # Inline HTML — needed for badges and layout in README
 MD041: false # First line should be top-level heading — READMEs use HTML header

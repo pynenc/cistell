@@ -155,6 +155,83 @@ fn load_config_file(py: Python<'_>, path: &str, config_id: Option<&str>) -> PyRe
 }
 
 // ---------------------------------------------------------------------------
+// resolve_field – helpers
+// ---------------------------------------------------------------------------
+
+/// Walk `dict[keys[0]][keys[1]]…`, casting each intermediate value to [`PyDict`].
+///
+/// Returns `None` when any key is absent or any intermediate is not a dict.
+fn dict_chain_get<'py>(
+    dict: &Bound<'py, PyDict>,
+    keys: &[&str],
+) -> PyResult<Option<Bound<'py, PyAny>>> {
+    let Some((&first, rest)) = keys.split_first() else {
+        return Ok(None);
+    };
+    let Some(mut current) = dict.get_item(first)? else {
+        return Ok(None);
+    };
+    for key in rest {
+        let next = {
+            let Ok(sub) = current.cast::<PyDict>() else {
+                return Ok(None);
+            };
+            sub.get_item(key)?
+        };
+        match next {
+            Some(val) => current = val,
+            None => return Ok(None),
+        }
+    }
+    Ok(Some(current))
+}
+
+/// Look up a value in `mapping` via a chain of dict keys, guarded by `mapped_keys`.
+///
+/// If the composite key is already in `mapped_keys` the lookup is skipped
+/// (returns `None`).  On a successful find the composite key is recorded in
+/// `mapped_keys` to prevent duplicate application in multi-inheritance.
+fn try_mapping_lookup<'py>(
+    mapping: &Bound<'py, PyDict>,
+    keys: &[&str],
+    composite_key: &str,
+    mapped_keys: Option<&Bound<'py, PySet>>,
+) -> PyResult<Option<Bound<'py, PyAny>>> {
+    if let Some(mk) = mapped_keys {
+        if mk.contains(composite_key)? {
+            return Ok(None);
+        }
+    }
+    let Some(val) = dict_chain_get(mapping, keys)? else {
+        return Ok(None);
+    };
+    if let Some(mk) = mapped_keys {
+        mk.add(composite_key)?;
+    }
+    Ok(Some(val))
+}
+
+/// Try to read an environment variable and wrap it as a Python string with provenance.
+fn resolve_env_var(
+    py: Python<'_>,
+    key: &str,
+    secret: bool,
+) -> PyResult<Option<(Py<PyAny>, FieldProvenance)>> {
+    let Ok(val) = std::env::var(key) else {
+        return Ok(None);
+    };
+    Ok(Some((
+        val.into_pyobject(py)?.into_any().unbind(),
+        FieldProvenance {
+            source: format!("env var '{key}'"),
+            is_default: false,
+            is_secret: secret,
+            display_value: None,
+        },
+    )))
+}
+
+// ---------------------------------------------------------------------------
 // resolve_field
 // ---------------------------------------------------------------------------
 
@@ -166,8 +243,16 @@ fn load_config_file(py: Python<'_>, path: &str, config_id: Option<&str>) -> PyRe
 /// The `mapped_keys` set prevents the same `"{source}##{field}"` pair from
 /// being applied twice (critical for multi-inheritance).
 ///
+/// **Qualifier subsections** (`extra_qualifiers`) are checked after the
+/// class-specific subsection with even higher priority.  For example, pynenc
+/// passes `["module_name.task_name"]` so that a YAML section like
+/// `task: { module_name.task_name: { max_retries: 5 } }` overrides the
+/// class-level `task: { max_retries: 10 }`.
+///
 /// **Env vars** (highest priority) always override; they are not gated by
-/// `mapped_keys`.
+/// `mapped_keys`.  When `extra_env_keys` is provided, those keys are checked
+/// **after** `class_env_key` and `generic_env_key`, giving them the highest
+/// possible priority.
 ///
 /// Returns `Some((value, FieldProvenance))` when a source provides a value,
 /// or `None` when nothing was found (caller should keep any previously-set
@@ -182,6 +267,8 @@ fn load_config_file(py: Python<'_>, path: &str, config_id: Option<&str>) -> PyRe
     secret = false,
     mappings = None,
     mapped_keys = None,
+    extra_qualifiers = None,
+    extra_env_keys = None,
 ))]
 #[allow(clippy::too_many_arguments)]
 fn resolve_field<'py>(
@@ -193,6 +280,8 @@ fn resolve_field<'py>(
     secret: bool,
     mappings: Option<&Bound<'py, PyList>>,
     mapped_keys: Option<&Bound<'py, PySet>>,
+    extra_qualifiers: Option<&Bound<'py, PyList>>,
+    extra_env_keys: Option<&Bound<'py, PyList>>,
 ) -> PyResult<Option<(Py<PyAny>, FieldProvenance)>> {
     let mut current_value: Option<Py<PyAny>> = None;
     let mut current_source = String::new();
@@ -207,36 +296,36 @@ fn resolve_field<'py>(
 
             // --- generic: mapping[field_name] ---
             let general_key = format!("{source_name}##{field_name}");
-            let check_general = match mapped_keys {
-                Some(keys) => !keys.contains(&general_key)?,
-                None => true,
-            };
-            if check_general {
-                if let Some(val) = mapping.get_item(field_name)? {
-                    current_value = Some(val.unbind());
-                    current_source.clone_from(&source_name);
-                    if let Some(keys) = mapped_keys {
-                        keys.add(&general_key)?;
-                    }
-                }
+            if let Some(val) =
+                try_mapping_lookup(mapping, &[field_name], &general_key, mapped_keys)?
+            {
+                current_value = Some(val.unbind());
+                current_source.clone_from(&source_name);
             }
 
             // --- class-specific: mapping[config_id][field_name] ---
             let class_key = format!("{source_name}##{config_id}##{field_name}");
-            let check_class = match mapped_keys {
-                Some(keys) => !keys.contains(&class_key)?,
-                None => true,
-            };
-            if check_class {
-                if let Some(conf_obj) = mapping.get_item(config_id)? {
-                    if let Ok(conf_dict) = conf_obj.cast::<PyDict>() {
-                        if let Some(val) = conf_dict.get_item(field_name)? {
-                            current_value = Some(val.unbind());
-                            current_source.clone_from(&source_name);
-                            if let Some(keys) = mapped_keys {
-                                keys.add(&class_key)?;
-                            }
-                        }
+            if let Some(val) =
+                try_mapping_lookup(mapping, &[config_id, field_name], &class_key, mapped_keys)?
+            {
+                current_value = Some(val.unbind());
+                current_source.clone_from(&source_name);
+            }
+
+            // --- qualifier subsections: mapping[config_id][qualifier][field_name] ---
+            // Higher priority than class-specific; later qualifiers win.
+            if let Some(qualifiers) = extra_qualifiers {
+                for qual_item in qualifiers.iter() {
+                    let qualifier: String = qual_item.extract()?;
+                    let qual_key = format!("{source_name}##{config_id}##{qualifier}##{field_name}");
+                    if let Some(val) = try_mapping_lookup(
+                        mapping,
+                        &[config_id, &qualifier, field_name],
+                        &qual_key,
+                        mapped_keys,
+                    )? {
+                        current_value = Some(val.unbind());
+                        current_source.clone_from(&source_name);
                     }
                 }
             }
@@ -244,27 +333,21 @@ fn resolve_field<'py>(
     }
 
     // 2. Env vars (highest priority, always override).
-    if let Ok(val) = std::env::var(class_env_key) {
-        return Ok(Some((
-            val.into_pyobject(py)?.into_any().unbind(),
-            FieldProvenance {
-                source: format!("env var '{class_env_key}'"),
-                is_default: false,
-                is_secret: secret,
-                display_value: None,
-            },
-        )));
+    // Extra env keys have the highest priority; checked first so they win.
+    if let Some(extra_keys) = extra_env_keys {
+        // Iterate in reverse so the last key in the list has highest priority.
+        for key_item in extra_keys.iter().rev() {
+            let env_key: String = key_item.extract()?;
+            if let Some(result) = resolve_env_var(py, &env_key, secret)? {
+                return Ok(Some(result));
+            }
+        }
     }
-    if let Ok(val) = std::env::var(generic_env_key) {
-        return Ok(Some((
-            val.into_pyobject(py)?.into_any().unbind(),
-            FieldProvenance {
-                source: format!("env var '{generic_env_key}'"),
-                is_default: false,
-                is_secret: secret,
-                display_value: None,
-            },
-        )));
+    if let Some(result) = resolve_env_var(py, class_env_key, secret)? {
+        return Ok(Some(result));
+    }
+    if let Some(result) = resolve_env_var(py, generic_env_key, secret)? {
+        return Ok(Some(result));
     }
 
     // 3. Return mapping result or None.

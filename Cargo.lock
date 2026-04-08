@@ -113,7 +113,7 @@ dependencies = [
 
 [[package]]
 name = "cistell-core"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "cistell-macros",
  "codspeed-criterion-compat",
@@ -132,7 +132,7 @@ dependencies = [
 
 [[package]]
 name = "cistell-macros"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -141,7 +141,7 @@ dependencies = [
 
 [[package]]
 name = "cistell-py"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "cistell-core",
  "pyo3",
