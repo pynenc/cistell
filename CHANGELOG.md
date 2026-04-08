@@ -19,18 +19,18 @@
 
 ### 🚀 Features
 
-* feat: Add CodSpeed continuous performance benchmarks (#39) @codspeed-hq
+- feat: Add CodSpeed continuous performance benchmarks (#39) @codspeed-hq
 
 ### 🐛 Bug Fixes
 
-* fix(ci): skip release notes on non-release, fix labeler retriggering (#38) @codelluis
-* fix(ci): fix dependabot commit prefix and PyPI publish (#35) @codelluis
-* fix(ci): group dependabot PRs, add crate readmes, fix tag race (#32) @codelluis
+- fix(ci): skip release notes on non-release, fix labeler retriggering (#38) @codelluis
+- fix(ci): fix dependabot commit prefix and PyPI publish (#35) @codelluis
+- fix(ci): group dependabot PRs, add crate readmes, fix tag race (#32) @codelluis
 
 ### 🧰 Maintenance
 
-* chore: bump the rust-dependencies group with 2 updates (#36) @dependabot
-* ci: bump the github-actions group with 14 updates (#37) @dependabot
+- chore: bump the rust-dependencies group with 2 updates (#36) @dependabot
+- ci: bump the github-actions group with 14 updates (#37) @dependabot
 
 ## 0.1.0 (unreleased)
 
@@ -55,6 +55,7 @@
 ### Infrastructure
 
 - CI/CD: GitHub Actions aligned with rustvello/pynenc conventions
+
   - `main.yml`: quality, tests (matrix: ubuntu/macos × py3.12/3.13), docs, publish dry-run
   - `release-rust.yml`: publish cistell-macros and cistell-core to crates.io
   - `release-python.yml`: multi-platform wheels (Linux x86_64/aarch64, macOS x86_64/arm64, Windows)
@@ -63,7 +64,7 @@
   - `pr-title-checker.yml`: enforce conventional commit PR titles
   - `publish-release-notes.yml`: auto-publish release notes and update CHANGELOG
   - `smokeshow.yml`: coverage report hosting
-  
+
 - Pre-commit hooks: cargo-fmt, cargo-clippy, ruff, mypy, commitlint, typos, markdownlint, prettier
 - Makefile: install, check, build, test, publish-rust, publish-python, docs targets
 - Docs: Sphinx + furo theme with grid cards, Rust/Python dual-ecosystem messaging
