@@ -12,8 +12,8 @@
     <a href="https://pypi.org/project/cistell" target="_blank">
         <img src="https://img.shields.io/pypi/v/cistell?color=%2334D058&label=pypi" alt="PyPI">
     </a>
-    <a href="https://github.com/pynenc/cistell/actions">
-        <img src="https://github.com/pynenc/cistell/workflows/CI/badge.svg" alt="CI Status">
+    <a href="https://github.com/pynenc/cistell/actions/workflows/main.yml">
+        <img src="https://github.com/pynenc/cistell/actions/workflows/main.yml/badge.svg" alt="CI Status">
     </a>
     <a href="https://codspeed.io/pynenc/cistell?utm_source=badge"><img src="https://img.shields.io/endpoint?url=https://codspeed.io/badge.json" alt="CodSpeed"/></a>
     <a href="https://github.com/pynenc/cistell/blob/main/LICENSE">
